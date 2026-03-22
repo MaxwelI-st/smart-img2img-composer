@@ -496,6 +496,9 @@ _TAG_CATEGORIES = {
         "masturbation", "fingering", "cunnilingus", "anilingus", "anal", "vaginal", "oral",
         "tribadism", "reverse_cowgirl_position", "cowgirl_position", "mating_press", "spanking",
         "threesome", "group_sex", "gangbang", "orgy",
+        "facesitting", "smothering", "breast_smother", "double_penetration", "triple_penetration", 
+        "futa_with_futa", "futa_on_female", "choking", "asphyxiation", "spitroast", "thigh_sex", 
+        "armpit_sex", "deepthroat",
         "re:^tentacle", "mind_control", "hypnosis"
     },
     "🦑 クリーチャー・追加キャラ": {
@@ -517,11 +520,13 @@ _TAG_CATEGORIES = {
         "x-ray", "cross-section", "internal_cumshot", "womb", "stomach_deformation",
         "pov", "focus_on_breasts", "focus_on_ass", "focus_on_crotch", "focus_on_thighs", "cameltoe",
         "ass_focus", "breast_focus", "crotch_focus", "thigh_focus", "foot_focus", "armpit_focus",
+        "impregnation", "stomach_bulge", "throat_bulge",
         "close-up", "macro", "from_below", "from_above", "dutch_angle"
     },
     "💦 体液・汚れ系": {
         "cum", "creampie", "cum_on_face", "cum_on_breasts", "cum_in_pussy", "cum_inside", "cum_on_stomach",
         "semen", "sperm", "ejaculation", "facial", "bukkake",
+        "cum_in_mouth", "cum_in_ass", "cum_on_hair", "cum_pool", "swallowing", "swallowing_cum",
         "sweat", "sweatdrop", "saliva", "drool", "tears", "crying",
         "messy", "dirty", "covered_in_cum", "wet", "wet_clothes", "wet_hair",
         "urine", "peeing", "squirt", "love_nectar",
@@ -538,11 +543,13 @@ _TAG_CATEGORIES = {
         "panties_pulled_down", "half-closed_eyes", "partially_unbuttoned",
         "micro_bikini", "slingshot_swimsuit", "pasties",
         "nip_slip", "wardrobe_malfunction", "torn_clothes", "see-through",
+        "panty_pull", "bra_pull", "no_panties", "no_bra", "breast_spilling_over", "crotchless_panties",
         "naked", "nude", "topless", "bottomless"
     },
     "🍆 局所・モザイク": {
         "penis", "balls", "testicles", "erection", "vein", "precum", "foreskin",
         "pussy", "vagina", "clitoris", "labia", "cameltoe", "pubic_hair", "anus",
+        "huge_penis", "monster_penis", "horse_penis", "tentacle_penetration", "multiple_penises", "futanari",
         "uncensored", "censored", "bar_censor", "mosaic_censoring", "censor_steam",
         "holding_penis", "rubbing_penis", "fucking_machine", "glory_hole", "crotch",
         "nipples", "erect_nipples", "areola", "ass", "asshole", "butt"
