@@ -508,6 +508,32 @@ _TAG_CATEGORIES = {
         "cup", "glass", "bottle", "plate", "food",
         "re:^wand", "staff", "magic", "cigarette", "pipe"
     },
+    "🔞 特殊構図・フォーカス": {
+        "x-ray", "cross-section", "internal_cumshot", "womb", "stomach_deformation",
+        "pov", "focus_on_breasts", "focus_on_ass", "focus_on_crotch", "focus_on_thighs", "cameltoe",
+        "ass_focus", "breast_focus", "crotch_focus", "thigh_focus", "foot_focus", "armpit_focus",
+        "close-up", "macro", "from_below", "from_above", "dutch_angle"
+    },
+    "💦 体液・汚れ系": {
+        "cum", "creampie", "cum_on_face", "cum_on_breasts", "cum_in_pussy", "cum_inside", "cum_on_stomach",
+        "semen", "sperm", "ejaculation", "facial", "bukkake",
+        "sweat", "sweatdrop", "saliva", "drool", "tears", "crying",
+        "messy", "dirty", "covered_in_cum", "wet", "wet_clothes", "wet_hair",
+        "urine", "peeing", "squirt", "love_nectar"
+    },
+    "🥵 表情・フェティッシュ状態": {
+        "ahegao", "heart-shaped_pupils", "rolled_back_eyes", "empty_eyes", "crazy_eyes",
+        "heavy_breathing", "panting", "trembling", "shaking", "blush", "heavy_blush",
+        "nosebleed", "open_mouth", "tongue_out", "saliva_trail",
+        "mind_break", "corruption", "trance", "hypnotized"
+    },
+    "👗 衣服の乱れ・着脱": {
+        "clothes_pull", "tearing_clothes", "skirt_lift", "shirt_lift", "undressing", 
+        "panties_pulled_down", "half-closed_eyes", "partially_unbuttoned",
+        "micro_bikini", "slingshot_swimsuit", "pasties",
+        "nip_slip", "wardrobe_malfunction", "torn_clothes", "see-through",
+        "naked", "nude", "topless", "bottomless"
+    },
     "メタタグ": {
         "highres", "absurdres", "masterpiece", "best_quality", "re:_quality$", "re:^rating_",
         "re:^score_", "realistic", "anime", "manga", "official_art", "key_visual",
