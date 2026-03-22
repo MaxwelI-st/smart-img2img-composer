@@ -535,6 +535,12 @@ _TAG_CATEGORIES = {
         "nip_slip", "wardrobe_malfunction", "torn_clothes", "see-through",
         "naked", "nude", "topless", "bottomless"
     },
+    "🍆 局所・モザイク": {
+        "penis", "balls", "testicles", "erection", "vein", "precum", "foreskin",
+        "pussy", "vagina", "clitoris", "labia", "cameltoe", "pubic_hair", "anus",
+        "uncensored", "censored", "bar_censor", "mosaic_censoring", "censor_steam",
+        "holding_penis", "rubbing_penis", "fucking_machine", "glory_hole", "crotch"
+    },
     "メタタグ": {
         "highres", "absurdres", "masterpiece", "best_quality", "re:_quality$", "re:^rating_",
         "re:^score_", "realistic", "anime", "manga", "official_art", "key_visual",
@@ -1028,7 +1034,7 @@ def on_ui_tabs():
                     # --- アコーディオン化されたタグカテゴリ ---
                     _cat_base = ["構図・カメラ", "ポーズ・アクション", "背景・場所", "自然・天候", "照明", "雰囲気", "メタタグ"]
                     _cat_char = ["人物・基本属性", "髪型・顔周り", "表情・口", "服装・靴・装飾品"]
-                    _cat_nsfw = ["🎭 行為・アクション", "🦑 クリーチャー・追加キャラ", "🧸 アイテム・玩具", "🔞 特殊構図・フォーカス", "💦 体液・汚れ系", "🥵 表情・フェティッシュ状態", "👗 衣服の乱れ・着脱"]
+                    _cat_nsfw = ["🎭 行為・アクション", "🦑 クリーチャー・追加キャラ", "🧸 アイテム・玩具", "🔞 特殊構図・フォーカス", "💦 体液・汚れ系", "🥵 表情・フェティッシュ状態", "👗 衣服の乱れ・着脱", "🍆 局所・モザイク"]
                     
                     gr.Markdown("### 🏷️ 抽出するタグの種類（チェックした種類のタグだけを抽出します）")
                     with gr.Accordion("🖼️ 基本カテゴリ (構図・背景など)", open=True):
