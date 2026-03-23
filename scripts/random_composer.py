@@ -249,6 +249,42 @@ _I18N = {
         "en": "Format: `condition tag > prompt to add` (Added only if condition matched in image)",
         "ja": "「条件タグ > 追加したいプロンプト」の形式で記述 (複数行可)。画像から条件タグが出た時のみ追加されます。",
     },
+    
+    # --- タグカテゴリ名 ---
+    "cat_composition": {"en": "Composition & Camera", "ja": "構図・カメラ"},
+    "cat_pose": {"en": "Pose & Action", "ja": "ポーズ・アクション"},
+    "cat_background": {"en": "Background & Scene", "ja": "背景・場所"},
+    "cat_nature": {"en": "Nature & Weather", "ja": "自然・天候"},
+    "cat_lighting": {"en": "Lighting", "ja": "照明"},
+    "cat_atmosphere": {"en": "Atmosphere", "ja": "雰囲気"},
+    "cat_meta": {"en": "Meta Tags", "ja": "メタタグ"},
+    "cat_char_base": {"en": "Character Base", "ja": "人物・基本属性"},
+    "cat_char_hair": {"en": "Hair & Face Area", "ja": "髪型・顔周り"},
+    "cat_char_face": {"en": "Expression & Mouth", "ja": "表情・口"},
+    "cat_char_clothes": {"en": "Clothes & Accessories", "ja": "服装・靴・装飾品"},
+    "cat_nsfw_action": {"en": "🎭 Actions", "ja": "🎭 行為・アクション"},
+    "cat_nsfw_creature": {"en": "🦑 Creatures", "ja": "🦑 クリーチャー・追加キャラ"},
+    "cat_nsfw_item": {"en": "🧸 Toys & Items", "ja": "🧸 アイテム・玩具"},
+    "cat_nsfw_focus": {"en": "🔞 Focus & Angles", "ja": "🔞 特殊構図・フォーカス"},
+    "cat_nsfw_fluids": {"en": "💦 Fluids & Mess", "ja": "💦 体液・汚れ系"},
+    "cat_nsfw_fetish": {"en": "🥵 Fetish States", "ja": "🥵 表情・フェティッシュ状態"},
+    "cat_nsfw_clothes_mess": {"en": "👗 Clothes Mess", "ja": "👗 衣服の乱れ・着脱"},
+    "cat_nsfw_censored": {"en": "🍆 Censor & Genitals", "ja": "🍆 局所・モザイク"},
+
+    # --- 関数戻り値メッセージ ---
+    "msg_settings_saved": {"en": "✅ Settings saved", "ja": "✅ 設定を保存しました"},
+    "msg_settings_err": {"en": "❌ Failed to save settings:", "ja": "❌ 設定の保存に失敗しました:"},
+    "msg_load_err": {"en": "❌ Failed to load image:", "ja": "❌ 画像を読み込めません:"},
+    "msg_tagger_err": {"en": "❌ WD14 Tagger API not found. Please ensure the extension is installed.", "ja": "❌ WD14 Tagger の API が見つかりません。Tagger拡張機能がインストールされているか確認してください。"},
+    "msg_api_err": {"en": "❌ API request failed:", "ja": "❌ APIリクエスト失敗:"},
+    "msg_tagger_not_found": {"en": "❌ Compatible interrogator not found. Tagger model not downloaded or version unsupported.", "ja": "❌ 対応するインタロゲーターが見つかりません。Taggerのモデルがダウンロードされていないか、拡張のバージョンが非対応です。"},
+    "msg_tag_fetch_err": {"en": "❌ Tag fetch error:", "ja": "❌ タグ取得エラー:"},
+    "msg_no_upload_err": {"en": "❌ Please upload an image", "ja": "❌ 画像をアップロードしてください"},
+    "msg_no_section_err": {"en": "❌ Please enter a section name", "ja": "❌ セクション名を入力してください"},
+    "msg_no_img_err": {"en": "❌ No image provided", "ja": "❌ 画像部分の指定がありませんでした"},
+    "msg_no_tags_err": {"en": "❌ No matching tags found", "ja": "❌ 該当するタグが見つかりませんでした"},
+    "msg_memo_appended": {"en": "✅ Appended to memo file", "ja": "✅ メモファイルに追記しました"},
+    "msg_memo_err": {"en": "❌ Failed to append:", "ja": "❌ 追記に失敗しました:"},
     "default_negative": {
         "en": "🚫 Default Negative",
         "ja": "🚫 デフォルトネガティブ",
@@ -298,6 +334,92 @@ _I18N = {
         "en": "🌐 Language / 言語",
         "ja": "🌐 Language / 言語",
     },
+    # --- ログメッセージ ---
+    "log_sel_sequential": {"en": "⬇️ Selected (Sequential {index}/{total}): {filename}", "ja": "⬇️ 選択画像 (順番 {index}/{total}): {filename}"},
+    "log_sel_random": {"en": "🎲 Selected (Random): {filename}", "ja": "🎲 選択画像 (ランダム): {filename}"},
+    "log_no_sections": {"en": "⚠️ No sections found in memo file", "ja": "⚠️ メモファイルにセクションが見つかりません"},
+    "log_sections_count": {"en": "📖 Sections count: {count}", "ja": "📖 メモセクション数: {count}"},
+    "log_fallback": {"en": "⚠️ Fallback to [default] section", "ja": "⚠️ 一致しないため [default] セクションへフォールバックします"},
+    "log_no_match": {"en": "⚠️ No matching section found", "ja": "⚠️ 一致するセクションが見つかりませんでした"},
+    "log_match_count": {"en": "✅ Match count: {count}", "ja": "✅ 一致数: {count}件"},
+    "log_all_tags": {"en": "📊 Total tags: {count}", "ja": "📊 全タグ数: {count}"},
+    "log_filtered_tags": {"en": "✅ Filtered: {count}", "ja": "✅ フィルタ後: {count}"},
+    "log_excluded_tags": {"en": "🗑️ Excluded: {count}", "ja": "🗑️ 除外タグ数: {count}"},
+    "log_custom_match": {"en": "🎯 Custom match: [{cond}] => Added: {prompt}", "ja": "🎯 条件マッチ: [{cond}] => 追加: {prompt}"},
+    "log_no_pos_prompt": {"en": "⚠️ No valid positive prompt", "ja": "⚠️ 有効なポジティブプロンプトがありません"},
+    
+    # --- 使い方タブ ---
+    "tab_usage": {"en": "📖 Usage", "ja": "📖 使い方"},
+    "usage_md": {
+        "en": (
+            "## How to write Memo File\n"
+            "Create a text file and write in the following format:\n"
+            "```text\n"
+            "[title1]\n"
+            "positive:\n"
+            "(masterpiece:1.1), 1girl, portrait\n"
+            "\n"
+            "negative:\n"
+            "lowres, blurry, artifact\n"
+            "\n"
+            "[city]\n"
+            "positive:\n"
+            "skyline, sunset, cinematic lighting\n"
+            "\n"
+            "negative:\n"
+            "lowres, text, watermark\n"
+            "```\n\n"
+            "## Rules\n"
+            "- `[name]` = Section start\n"
+            "- Under `positive:` = Positive prompt\n"
+            "- Under `negative:` = Negative prompt\n"
+            "- If `positive:`/`negative:` omitted, entire block is positive\n"
+            "- `#` = Comment / Empty lines = Ignored\n\n"
+            "## Using in img2img\n"
+            "1. Save your folder paths in **⚙️ Settings** tab.\n"
+            "2. In **img2img** tab, expand **🎲 Smart Composer** and check **Enable**.\n"
+            "3. Click **Generate** to start auto-processing.\n\n"
+            "## Auto-Prompt Generation\n"
+            "1. Upload image to **🏷️ Auto-Prompt Gen** tab.\n"
+            "2. Enter section name and click **Generate Tags**.\n"
+            "3. Review/edit and click **Append to Memo**.\n"
+            "4. Requires WD14 Tagger extension."
+        ),
+        "ja": (
+            "## メモファイルの書き方\n"
+            "テキストファイルを作成して以下の形式で書きます：\n"
+            "```text\n"
+            "[タイトル1]\n"
+            "positive:\n"
+            "(masterpiece:1.1), 1girl, portrait\n"
+            "\n"
+            "negative:\n"
+            "lowres, blurry, artifact\n"
+            "\n"
+            "[city]\n"
+            "positive:\n"
+            "skyline, sunset, cinematic lighting\n"
+            "\n"
+            "negative:\n"
+            "lowres, text, watermark\n"
+            "```\n\n"
+            "## ルール\n"
+            "- `[名前]` = セクション開始\n"
+            "- `positive:` の下 = ポジティブプロンプト\n"
+            "- `negative:` の下 = ネガティブプロンプト\n"
+            "- `positive:` / `negative:` 省略時は全て positive 扱い\n"
+            "- `#` = コメント / 空行 = 無視\n\n"
+            "## img2img での使い方\n"
+            "1. **⚙️ 設定** タブで画像フォルダ・メモファイルを保存\n"
+            "2. **img2img** タブで **🎲 Smart Composer** → **有効化**\n"
+            "3. **Generate** ボタンで自動実行\n\n"
+            "## プロンプト自動生成\n"
+            "1. **🏷️ プロンプト自動生成** タブで画像をアップロード\n"
+            "2. セクション名を入力して **タグ解析＆生成**\n"
+            "3. 結果を確認・編集して **メモファイルに追記**\n"
+            "4. WD14 Tagger 拡張が必要です"
+        )
+    },
 }
 
 
@@ -338,9 +460,9 @@ def save_config(config: dict) -> str:
         os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
-        return "✅ 設定を保存しました"
+        return t("msg_settings_saved")
     except IOError as e:
-        return f"❌ 保存に失敗しました: {e}"
+        return f"{t('msg_settings_err')} {e}"
 
 
 # ======================================================================
@@ -441,31 +563,44 @@ def get_image_files(folder: str) -> list:
 def match_image_to_sections(image_path: str, sections: dict, threshold: float) -> list:
     basename = os.path.splitext(os.path.basename(image_path))[0].lower()
     exact_match = []
-    partial_match = []
+    partial_match_candidates = []
 
     for section_name, data in sections.items():
         # 完全一致（最優先）
         if basename == section_name:
             exact_match.append(data)
             continue
-        # 部分一致：短い側が3文字以上かつ長い側の50%以上の長さである場合のみ
+            
+        # 部分一致のスコア計算
+        score = 0
         if section_name in basename or basename in section_name:
             shorter = min(len(basename), len(section_name))
             longer = max(len(basename), len(section_name))
-            if shorter >= 3 and longer > 0 and (shorter / longer) >= 0.5:
-                partial_match.append(data)
-                continue
-        # 類似度マッチ（閾値以下の場合のみ試行）
-        if threshold < 1.0:
-            shorter = min(len(basename), len(section_name))
+            if shorter >= 3 and longer > 0:
+                score = shorter / longer
+        
+        # 類似度マッチ（閾値以下の場合のみ試行してスコアを更新）
+        if score < 1.0 and threshold < 1.0:
             longer = max(len(basename), len(section_name))
             if longer > 0:
                 common = sum(1 for a, b in zip(basename, section_name) if a == b)
-                if common > 0 and (common / longer) >= threshold:
-                    partial_match.append(data)
+                sim_score = common / longer
+                if sim_score > score:
+                    score = sim_score
+        
+        if score >= threshold:
+            partial_match_candidates.append((score, data))
 
-    # 完全一致があれば完全一致のみ返す（混合しない）
-    return exact_match if exact_match else partial_match
+    # 完全一致があれば完全一致のみ返す
+    if exact_match:
+        return [exact_match[0]] # 複数あっても1件に絞る（通常は辞書なので1件）
+    
+    # 部分一致があれば最もスコアが高い1件のみ返す
+    if partial_match_candidates:
+        partial_match_candidates.sort(key=lambda x: x[0], reverse=True)
+        return [partial_match_candidates[0][1]]
+
+    return []
 
 
 def check_lora_exists(lora_str: str) -> bool:
@@ -479,6 +614,19 @@ def check_lora_exists(lora_str: str) -> bool:
         pass
     return True
 
+def _clean_prompt(prompt: str) -> str:
+    """カンマ区切りのプロンプトから重複を削除し、クリーニングする"""
+    if not prompt:
+        return ""
+    parts = [p.strip() for p in prompt.split(",")]
+    seen = set()
+    unique = []
+    for p in parts:
+        if p and p.lower() not in seen:
+            seen.add(p.lower())
+            unique.append(p)
+    return ", ".join(unique)
+
 def compose_prompt(image_folder: str, memo_file: str, match_threshold: float, selection_mode="Random") -> tuple:
     """戻り値: (画像パス, positive, negative, ログ)"""
     log = []
@@ -488,33 +636,33 @@ def compose_prompt(image_folder: str, memo_file: str, match_threshold: float, se
 
     image_files = get_image_files(image_folder)
     if not image_files:
-        return None, "", "", t("no_images")
+        return None, "", "", t("msg_no_images")
 
-    if selection_mode and ("Sequential" in selection_mode or "順番" in selection_mode):
+    if selection_mode == "sequential":
         last_index = config.get("last_sequential_index", 0)
         index = last_index % len(image_files)
         selected = image_files[index]
         config["last_sequential_index"] = index + 1
         save_config(config)
-        log.append(f"⬇️ 選択画像 (順番 {index+1}/{len(image_files)}): {os.path.basename(selected)}")
+        log.append(t("log_sel_sequential").format(index=index+1, total=len(image_files), filename=os.path.basename(selected)))
     else:
         selected = random.choice(image_files)
-        log.append(f"🎲 選択画像 (ランダム): {os.path.basename(selected)}")
+        log.append(t("log_sel_random").format(filename=os.path.basename(selected)))
 
     sections = parse_memo_file(memo_file)
     if not sections:
-        log.append("⚠️ メモファイルにセクションが見つかりません")
+        log.append(t("log_no_sections"))
         return selected, "", "", "\n".join(log)
 
-    log.append(f"📖 メモセクション数: {len(sections)}")
+    log.append(t("log_sections_count").format(count=len(sections)))
     matched = match_image_to_sections(selected, sections, match_threshold)
 
     if not matched:
         if fallback_enabled and "default" in sections:
-            log.append("⚠️ 一致しないため [default] セクションへフォールバックします")
+            log.append(t("log_fallback"))
             matched = [sections["default"]]
         else:
-            log.append("⚠️ 一致するセクションが見つかりませんでした")
+            log.append(t("log_no_match"))
             return selected, "", "", "\n".join(log)
 
     pos_parts, neg_parts, lora_parts = [], [], []
@@ -542,10 +690,10 @@ def compose_prompt(image_folder: str, memo_file: str, match_threshold: float, se
     if lora_parts:
         pos_parts = lora_parts + pos_parts
 
-    positive = ", ".join(pos_parts)
-    negative = ", ".join(neg_parts)
+    positive = _clean_prompt(", ".join(pos_parts))
+    negative = _clean_prompt(", ".join(neg_parts))
 
-    log.append(f"✅ 一致数: {len(matched)}件")
+    log.append(t("log_match_count").format(count=len(matched)))
     if positive:
         log.append(f"📝 Positive: {positive}")
     if negative:
@@ -571,8 +719,10 @@ def preview_compose(image_folder, memo_file, match_threshold):
     return img, positive, negative, log
 
 
-def save_settings(language, image_folder, memo_file, match_threshold, generation_count, fallback, auto_lora):
+def save_all_settings(language, image_folder, memo_file, match_threshold, generation_count, fallback, auto_lora,
+                      gen_confidence, gen_positive, gen_negative, gen_custom, cat_base, cat_char, cat_nsfw):
     config = load_config()
+    categories = cat_base + cat_char + cat_nsfw
     config.update({
         "language": language,
         "image_folder": image_folder,
@@ -581,18 +731,10 @@ def save_settings(language, image_folder, memo_file, match_threshold, generation
         "generation_count": int(generation_count),
         "fallback_enabled": fallback,
         "auto_lora_enabled": auto_lora,
-    })
-    return save_config(config)
-
-
-def save_gen_settings(confidence, pos, neg, custom, cat_base, cat_char, cat_nsfw):
-    categories = cat_base + cat_char + cat_nsfw
-    config = load_config()
-    config.update({
-        "gen_confidence": confidence,
-        "gen_positive": pos,
-        "gen_negative": neg,
-        "gen_custom_dict": custom,
+        "gen_confidence": gen_confidence,
+        "gen_positive": gen_positive,
+        "gen_negative": gen_negative,
+        "gen_custom_dict": gen_custom,
         "gen_categories": categories,
     })
     return save_config(config)
@@ -605,7 +747,7 @@ def save_gen_settings(confidence, pos, neg, custom, cat_base, cat_char, cat_nsfw
 
 # ── 許可タグカテゴリ辞書 ──
 _TAG_CATEGORIES = {
-    "構図・カメラ": {
+    "cat_composition": {
         "portrait", "upper_body", "lower_body", "full_body",
         "cowboy_shot", "close-up", "wide_shot", "medium_shot",
         "head_shot", "bust_shot", "knee_shot", "profile", "three-quarter_view",
@@ -618,7 +760,7 @@ _TAG_CATEGORIES = {
         "looking_afar", "looking_at_another",
         "facing_away", "facing_viewer", "rotated",
     },
-    "ポーズ・アクション": {
+    "cat_pose": {
         "standing", "sitting", "lying", "walking", "running",
         "jumping", "crouching", "kneeling", "leaning",
         "leaning_forward", "leaning_back",
@@ -644,7 +786,7 @@ _TAG_CATEGORIES = {
         "action", "dynamic_pose", "floating",
         "falling", "spinning", "twisting",
     },
-    "背景・場所": {
+    "cat_background": {
         "outdoors", "indoors", "cityscape", "landscape", "scenery",
         "city", "town", "village", "suburb",
         "sky", "blue_sky", "cloudy_sky", "starry_sky", "night_sky",
@@ -682,7 +824,7 @@ _TAG_CATEGORIES = {
         "desert", "oasis", "wasteland", "swamp",
         "volcano", "island", "archipelago",
     },
-    "自然・天候": {
+    "cat_nature": {
         "snow", "snowing", "rain", "raining", "storm",
         "fog", "mist", "haze", "wind", "windy", "breeze",
         "lightning", "thunder", "rainbow",
@@ -699,7 +841,7 @@ _TAG_CATEGORIES = {
         "feather", "feathers", "leaf", "leaves",
         "butterfly", "bird", "birds",
     },
-    "照明": {
+    "cat_lighting": {
         "sunlight", "moonlight", "starlight",
         "backlighting", "backlight",
         "rim_lighting", "rim_light",
@@ -719,7 +861,7 @@ _TAG_CATEGORIES = {
         "dappled_light", "dappled_sunlight",
         "chiaroscuro", "high_contrast", "low_key",
     },
-    "雰囲気": {
+    "cat_atmosphere": {
         "depth_of_field", "bokeh", "shallow_depth_of_field",
         "blurry_background", "blurry_foreground",
         "detailed_background", "simple_background",
@@ -734,24 +876,24 @@ _TAG_CATEGORIES = {
         "wide_angle", "telephoto", "fisheye",
         "panorama", "split_screen",
     },
-    "人物・基本属性": {
+    "cat_char_base": {
         "re:^\\d+girl", "re:^\\d+boy", "solo", "duo", "trio", "multiple_girls", "multiple_boys",
         "couple", "group", "re:.*breasts?$", "re:^slim$", "re:^muscular", "petite", "chubby",
         "thick_thighs", "wide_hips", "narrow_waist", "abs", "navel", "midriff", "cleavage",
         "collarbone", "re:^shoulder", "re:_skin$", "re:^skin_", "pale", "tan", "re:^dark_skin",
         "re:^nail", "re:^lip", "ear", "ears", "nose", "mole", "scar", "tattoo", "freckle"
     },
-    "髪型・顔周り": {
+    "cat_char_hair": {
         "re:_hair$", "re:^hair_", "bangs", "ponytail", "twintails", "braid", "ahoge", "sidelocks",
         "bob_cut", "hime_cut", "pixie_cut", "drill_hair", "long_hair", "short_hair", "medium_hair",
         "very_long_hair", "re:_eyes$", "heterochromia", "eyelashes", "pupils"
     },
-    "表情・口": {
+    "cat_char_face": {
         "smile", "grin", "frown", "smirk", "re:^blush", "open_mouth", "closed_mouth",
         "re:^fang", "tears", "crying", "sweatdrop", "re:^tongue", "pout", "surprised", "angry",
         "embarrassed", "shy", "sad", "happy", "expressionless", "serious"
     },
-    "服装・靴・装飾品": {
+    "cat_char_clothes": {
         "re:^dress", "re:^shirt", "re:^skirt", "pants", "shorts", "re:^uniform", "re:^armor",
         "re:^bikini", "re:^swimsuit", "re:^jacket", "coat", "cape", "cloak", "re:^hoodie",
         "re:^sweater", "vest", "re:^cardigan", "re:^kimono", "yukata", "hanfu", "re:^maid",
@@ -769,7 +911,7 @@ _TAG_CATEGORIES = {
         "re:^zipper", "re:^button", "hood", "re:^hooded",
         "jirai_kei", "yami_kawaii", "cybergoth", "wa_lolita", "qi_lolita", "zettai_ryouiki"
     },
-    "🎭 行為・アクション": {
+    "cat_nsfw_action": {
         "sex", "kissing", "hugging", "embracing", "holding_hands",
         "bound", "tied_up", "shibari", "rope", "gag", "gagged",
         "blindfold", "blindfolded", "chained", "cuffs", "handcuffs",
@@ -795,14 +937,14 @@ _TAG_CATEGORIES = {
         "shrimp_tie", "strappado", "bound_breasts", "bound_wrists", "bound_ankles", "femdom", "defloration",
         "re:^tentacle", "mind_control", "hypnosis"
     },
-    "🦑 クリーチャー・追加キャラ": {
+    "cat_nsfw_creature": {
         "monster", "creature", "demon", "devil", "angel",
         "orc", "goblin", "elf", "beast", "dragon",
         "slime", "tentacles", "alien", "ghost", "zombie",
         "robot", "cyborg", "android", "mecha",
         "animal", "dog", "cat", "bird", "fish", "horse", "wolf", "fox"
     },
-    "🧸 アイテム・玩具": {
+    "cat_nsfw_item": {
         "toy", "sex_toy", "vibrator", "dildo", "plug", "magic_wand",
         "whip", "crop", "leash", "collar",
         "weapon", "sword", "gun", "knife", "bow", "shield",
@@ -812,7 +954,7 @@ _TAG_CATEGORIES = {
         "suction_cup_dildo", "used_condom", "hitachi_magic_wand", "crotch_tattoo",
         "crotch_rope", "milking_machine", "breast_pump", "dilation_tape"
     },
-    "🔞 特殊構図・フォーカス": {
+    "cat_nsfw_focus": {
         "x-ray", "cross-section", "internal_cumshot", "womb", "stomach_deformation",
         "pov", "focus_on_breasts", "focus_on_ass", "focus_on_crotch", "focus_on_thighs", "cameltoe",
         "ass_focus", "breast_focus", "crotch_focus", "thigh_focus", "foot_focus", "armpit_focus",
@@ -820,7 +962,7 @@ _TAG_CATEGORIES = {
         "before_sex", "after_sex", "after_vaginal", "fucked_silly", "cross-section",
         "close-up", "macro", "from_below", "from_above", "dutch_angle"
     },
-    "💦 体液・汚れ系": {
+    "cat_nsfw_fluids": {
         "cum", "creampie", "cum_on_face", "cum_on_breasts", "cum_in_pussy", "cum_inside", "cum_on_stomach",
         "semen", "sperm", "ejaculation", "facial", "bukkake",
         "cum_in_mouth", "cum_in_ass", "cum_on_hair", "cum_pool", "swallowing", "swallowing_cum",
@@ -832,13 +974,13 @@ _TAG_CATEGORIES = {
         "pussy_juice_puddle", "pussy_juice_trail", "pussy_juice_stain", "wet_panty",
         "wet_stain_on_panty", "drinking_pee", "peeing_in_cup", "public_urination", "peeing_self"
     },
-    "🥵 表情・フェティッシュ状態": {
+    "cat_nsfw_fetish": {
         "ahegao", "heart-shaped_pupils", "rolled_back_eyes", "empty_eyes", "crazy_eyes",
         "heavy_breathing", "panting", "trembling", "shaking", "blush", "heavy_blush",
         "nosebleed", "open_mouth", "tongue_out", "saliva_trail",
         "mind_break", "corruption", "trance", "hypnotized"
     },
-    "👗 衣服の乱れ・着脱": {
+    "cat_nsfw_clothes_mess": {
         "clothes_pull", "tearing_clothes", "skirt_lift", "shirt_lift", "undressing", 
         "panties_pulled_down", "half-closed_eyes", "partially_unbuttoned",
         "micro_bikini", "slingshot_swimsuit", "pasties",
@@ -849,7 +991,7 @@ _TAG_CATEGORIES = {
         "panty_lift", "smelling_underwear", "wedgie", "tentacles_under_clothes",
         "naked", "nude", "topless", "bottomless"
     },
-    "🍆 局所・モザイク": {
+    "cat_nsfw_censored": {
         "penis", "balls", "testicles", "erection", "vein", "precum", "foreskin",
         "pussy", "vagina", "clitoris", "labia", "cameltoe", "pubic_hair", "anus",
         "huge_penis", "monster_penis", "horse_penis", "tentacle_penetration", "multiple_penises", "futanari",
@@ -861,7 +1003,7 @@ _TAG_CATEGORIES = {
         "puffy_nipples", "inverted_nipples", "presenting_nipples", "presenting_crotch",
         "ofuda_on_pussy", "futa_with_female", "ovum", "fertilization", "sperm_cell"
     },
-    "メタタグ": {
+    "cat_meta": {
         "highres", "absurdres", "masterpiece", "best_quality", "re:_quality$", "re:^rating_",
         "re:^score_", "realistic", "anime", "manga", "official_art", "key_visual",
         "traditional_media", "digital_media"
@@ -1024,12 +1166,12 @@ def _interrogate_image(pil_image, confidence_threshold: float = 0.35, selected_c
                     success = True
 
         if not success:
-            return {}, {}, "❌ 対応するインタロゲーターが見つかりません。Taggerのモデルがダウンロードされていないか、拡張のバージョンが非対応です。"
+            return {}, {}, t("msg_tagger_not_found")
 
         return _filter_tags(all_tags, confidence_threshold, selected_categories), all_tags, None
 
     except Exception as e:
-        return {}, {}, f"❌ タグ取得エラー: {e}\n{traceback.format_exc()}"
+        return {}, {}, t("msg_tag_fetch_err") + f" {e}\n{traceback.format_exc()}"
 
 
 # ======================================================================
@@ -1074,10 +1216,10 @@ def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_
     """画像を解析してメモエントリを生成"""
     gen_categories = cat_base + cat_char + cat_nsfw
     if image is None:
-        return "", "❌ 画像をアップロードしてください"
+        return "", t("msg_no_upload_err")
 
     if not section_name or not section_name.strip():
-        return "", "❌ セクション名を入力してください"
+        return "", t("msg_no_section_err")
 
     try:
         section_name = section_name.strip()
@@ -1089,12 +1231,12 @@ def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_
             return "", error
 
         log_lines = []
-        log_lines.append(f"📊 全タグ数: {len(all_tags)}")
-        log_lines.append(f"✅ フィルタ後: {len(filtered)}")
+        log_lines.append(t("log_all_tags").format(count=len(all_tags)))
+        log_lines.append(t("log_filtered_tags").format(count=len(filtered)))
 
         excluded_count = len(all_tags) - len(filtered)
         if excluded_count > 0:
-            log_lines.append(f"🗑️ 除外タグ数: {excluded_count}")
+            log_lines.append(t("log_excluded_tags").format(count=excluded_count))
 
         # ==== 好みのプロンプトの条件付与 ====
         matched_custom_prompts = []
@@ -1108,7 +1250,7 @@ def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_
                     continue
                 
                 left, right = line.split(separator, 1)
-                condition_tags = [t.strip().lower().replace(" ", "_") for t in left.split(",")]
+                condition_tags = [t_tag.strip().lower().replace(" ", "_") for t_tag in left.split(",")]
                 right_prompt = right.strip()
                 
                 if not condition_tags or not right_prompt:
@@ -1123,7 +1265,7 @@ def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_
                 
                 if match:
                     matched_custom_prompts.append(right_prompt)
-                    log_lines.append(f"🎯 条件マッチ: [{left}] => 追加: {right_prompt}")
+                    log_lines.append(t("log_custom_match").format(cond=left, prompt=right_prompt))
 
         # タグの文字列化
         generated_tags = _tags_to_prompt(filtered)
@@ -1140,7 +1282,7 @@ def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_
         final_positive = ", ".join(components)
 
         if not final_positive:
-            log_lines.append("⚠️ 有効なポジティブプロンプトがありません")
+            log_lines.append(t("log_no_pos_prompt"))
         else:
             log_lines.append(f"📝 Positive: {final_positive}")
             
@@ -1187,9 +1329,9 @@ def append_to_memo(memo_path, entry):
         with open(memo_path, "a", encoding="utf-8") as f:
             f.write(separator + entry.strip() + "\n")
 
-        return "✅ メモファイルに追記しました"
+        return t("msg_memo_appended")
     except IOError as e:
-        return f"❌ 追記に失敗しました: {e}"
+        return t("msg_memo_err") + f" {e}"
 
 
 # ======================================================================
@@ -1217,11 +1359,11 @@ class RandomComposerScript(scripts.Script):
                 elem_id="smart_composer_enabled",
             )
             # 画像選択モード: 内部キー "random" / "sequential" を使い、表示は翻訳
-            _sel_choices = [t("sel_random"), t("sel_sequential")]
+            _sel_choices = [(t("sel_random"), "random"), (t("sel_sequential"), "sequential")]
             selection_mode = gr.Radio(
                 label=t("selection_mode"),
                 choices=_sel_choices,
-                value=_sel_choices[0],
+                value="random",
                 elem_id="smart_composer_selection_mode",
             )
             override_prompt = gr.Checkbox(
@@ -1252,8 +1394,14 @@ class RandomComposerScript(scripts.Script):
         return [enabled, override_prompt, resize_mode, base_resolution, selection_mode]
 
     def before_process(self, p: processing.StableDiffusionProcessing, enabled, override_prompt, resize_mode="", base_resolution=1024, selection_mode=""):
-        """"before_process のみでプロンプト注入を行う（二重実行防止）"""
+        """before_process メソッドでプロンプト注入を行う。
+        getattr(p, '_smart_composer_processed', False) を使って二重実行を防止する。
+        """
         if not enabled:
+            return
+
+        # すでにこの処理オブジェクトで実行済みならスキップ
+        if getattr(p, "_smart_composer_processed", False):
             return
 
         config = load_config()
@@ -1264,8 +1412,9 @@ class RandomComposerScript(scripts.Script):
             selection_mode
         )
 
+        # 内部的な生成回数（Batch count）の設定
         generation_count = config.get("generation_count", 1)
-        if generation_count > 1:
+        if generation_count > p.n_iter:
             p.n_iter = generation_count
 
         if selected:
@@ -1274,7 +1423,6 @@ class RandomComposerScript(scripts.Script):
                 p.init_images = [img]
                 
                 # 画像サイズ自動調整
-                # リサイズモードのドロップダウンインデックスで判定
                 _resize_choices = [
                     t("resize_none"),
                     t("resize_slider"),
@@ -1305,24 +1453,28 @@ class RandomComposerScript(scripts.Script):
                     p.width = new_w
                     p.height = new_h
             except Exception as e:
-                print(f"[Smart Img2Img Composer] 画像読み込み失敗: {e}")
+                print(f"[Smart Img2Img Composer] 画像読み込み失敗: {selected}, Error: {e}")
+
+        # プロンプトの注入（p.prompt だけでなく all_prompts も更新する）
+        def inject(current_val, new_val, override):
+            if override:
+                return new_val
+            return f"{current_val}, {new_val}" if current_val else new_val
 
         if positive:
-            if override_prompt:
-                p.prompt = positive
-            else:
-                p.prompt = f"{p.prompt}, {positive}" if p.prompt else positive
+            p.prompt = inject(p.prompt, positive, override_prompt)
+            if hasattr(p, "all_prompts") and p.all_prompts:
+                p.all_prompts = [inject(x, positive, override_prompt) for x in p.all_prompts]
 
         if negative:
-            if override_prompt:
-                p.negative_prompt = negative
-            else:
-                if p.negative_prompt:
-                    p.negative_prompt = f"{p.negative_prompt}, {negative}"
-                else:
-                    p.negative_prompt = negative
+            p.negative_prompt = inject(p.negative_prompt, negative, override_prompt)
+            if hasattr(p, "all_negative_prompts") and p.all_negative_prompts:
+                p.all_negative_prompts = [inject(x, negative, override_prompt) for x in p.all_negative_prompts]
 
         print(f"[Smart Img2Img Composer]\n{log}")
+        
+        # 実行済みフラグをセット
+        setattr(p, "_smart_composer_processed", True)
 
 
 # ======================================================================
@@ -1387,18 +1539,11 @@ def on_ui_tabs():
                     preview_image = gr.Image(label=t("selected_image"), type="pil", interactive=False)
                     preview_positive = gr.Textbox(label=t("positive_prompt"), interactive=False, lines=3)
                     preview_negative = gr.Textbox(label=t("negative_prompt"), interactive=False, lines=2)
+                    # ----------------------------------------------------
+                    # --- 画像が見つからない場合などを翻訳メッセージにする ---
+                    # ----------------------------------------------------
+                    # --- 画像が見つからない場合などを翻訳メッセージにする ---
                     preview_log = gr.Textbox(label=t("log"), interactive=False, lines=6)
-
-            save_btn.click(
-                fn=save_settings,
-                inputs=[language_selector, image_folder, memo_file, match_threshold, generation_count, fallback_enabled, auto_lora_enabled],
-                outputs=[save_status],
-            )
-            preview_btn.click(
-                fn=preview_compose,
-                inputs=[image_folder, memo_file, match_threshold],
-                outputs=[preview_image, preview_positive, preview_negative, preview_log],
-            )
 
         # ─── プロンプト自動生成 ───
         with gr.Tab(t("tab_prompt_gen")):
@@ -1417,26 +1562,26 @@ def on_ui_tabs():
                         info=t("section_info"),
                     )
                     # --- アコーディオン化されたタグカテゴリ ---
-                    _cat_base = ["構図・カメラ", "ポーズ・アクション", "背景・場所", "自然・天候", "照明", "雰囲気", "メタタグ"]
-                    _cat_char = ["人物・基本属性", "髪型・顔周り", "表情・口", "服装・靴・装飾品"]
-                    _cat_nsfw = ["🎭 行為・アクション", "🦑 クリーチャー・追加キャラ", "🧸 アイテム・玩具", "🔞 特殊構図・フォーカス", "💦 体液・汚れ系", "🥵 表情・フェティッシュ状態", "👗 衣服の乱れ・着脱", "🍆 局所・モザイク"]
+                    _cat_base = ["cat_composition", "cat_pose", "cat_background", "cat_nature", "cat_lighting", "cat_atmosphere", "cat_meta"]
+                    _cat_char = ["cat_char_base", "cat_char_hair", "cat_char_face", "cat_char_clothes"]
+                    _cat_nsfw = ["cat_nsfw_action", "cat_nsfw_creature", "cat_nsfw_item", "cat_nsfw_focus", "cat_nsfw_fluids", "cat_nsfw_fetish", "cat_nsfw_clothes_mess", "cat_nsfw_censored"]
                     
                     gr.Markdown(t("h_categories"))
                     with gr.Accordion(t("cat_base"), open=True):
                         gen_cat_base = gr.CheckboxGroup(
-                            choices=_cat_base,
+                            choices=[(t(c), c) for c in _cat_base],
                             value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_base],
                             show_label=False
                         )
                     with gr.Accordion(t("cat_char"), open=False):
                         gen_cat_char = gr.CheckboxGroup(
-                            choices=_cat_char,
+                            choices=[(t(c), c) for c in _cat_char],
                             value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_char],
                             show_label=False
                         )
                     with gr.Accordion(t("cat_nsfw"), open=False):
                         gen_cat_nsfw = gr.CheckboxGroup(
-                            choices=_cat_nsfw,
+                            choices=[(t(c), c) for c in _cat_nsfw],
                             value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_nsfw],
                             show_label=False
                         )
@@ -1511,11 +1656,6 @@ def on_ui_tabs():
                     hidden_gen_w = gr.Textbox(visible=False)
                     hidden_gen_h = gr.Textbox(visible=False)
 
-            gen_save_btn.click(
-                fn=save_settings,
-                inputs=[language_selector, image_folder, memo_file, match_threshold, generation_count, fallback_enabled, auto_lora_enabled],
-                outputs=[gen_save_status],
-            )
 
             gen_btn.click(
                 fn=autogen_prompt,
@@ -1562,52 +1702,38 @@ def on_ui_tabs():
                 inputs=[hidden_gen_pos, hidden_gen_neg, hidden_gen_w, hidden_gen_h],
                 outputs=None,
             )
-            append_btn.click(
-                fn=lambda entry: append_to_memo(load_config().get("memo_file", ""), entry),
-                inputs=[gen_output],
-                outputs=[append_status],
-            )
-            gen_save_btn.click(
-                fn=save_gen_settings,
-                inputs=[gen_confidence, gen_positive, gen_negative, gen_custom_dict, gen_cat_base, gen_cat_char, gen_cat_nsfw],
-                outputs=[gen_save_status],
-            )
+
+        # ─── イベントハンドラ (すべてのコンポーネント定義後に記述) ───
+        save_btn.click(
+            fn=save_all_settings,
+            inputs=[
+                language_selector, image_folder, memo_file, match_threshold, generation_count, fallback_enabled, auto_lora_enabled,
+                gen_confidence, gen_positive, gen_negative, gen_custom_dict, gen_cat_base, gen_cat_char, gen_cat_nsfw
+            ],
+            outputs=[save_status],
+        )
+        preview_btn.click(
+            fn=preview_compose,
+            inputs=[image_folder, memo_file, match_threshold],
+            outputs=[preview_image, preview_positive, preview_negative, preview_log],
+        )
+        gen_save_btn.click(
+            fn=save_all_settings,
+            inputs=[
+                language_selector, image_folder, memo_file, match_threshold, generation_count, fallback_enabled, auto_lora_enabled,
+                gen_confidence, gen_positive, gen_negative, gen_custom_dict, gen_cat_base, gen_cat_char, gen_cat_nsfw
+            ],
+            outputs=[gen_save_status],
+        )
+        append_btn.click(
+            fn=lambda entry: append_to_memo(load_config().get("memo_file", ""), entry),
+            inputs=[gen_output],
+            outputs=[append_status],
+        )
 
         # ─── 使い方 ───
-        with gr.Tab("📖 使い方"):
-            gr.Markdown(
-                "## メモファイルの書き方\n"
-                "```\n"
-                "[タイトル1]\n"
-                "positive:\n"
-                "(masterpiece:1.1), 1girl, portrait\n"
-                "\n"
-                "negative:\n"
-                "lowres, blurry, artifact\n"
-                "\n"
-                "[city]\n"
-                "positive:\n"
-                "skyline, sunset, cinematic lighting\n"
-                "\n"
-                "negative:\n"
-                "lowres, text, watermark\n"
-                "```\n\n"
-                "## ルール\n"
-                "- `[名前]` = セクション開始\n"
-                "- `positive:` の下 = ポジティブプロンプト\n"
-                "- `negative:` の下 = ネガティブプロンプト\n"
-                "- `positive:` / `negative:` 省略時は全て positive 扱い\n"
-                "- `#` = コメント / 空行 = 無視\n\n"
-                "## img2img での使い方\n"
-                "1. **⚙️ 設定** タブで画像フォルダ・メモファイルを保存\n"
-                "2. **img2img** タブで **🎲 Random Composer** → **有効化**\n"
-                "3. **Generate** ボタンで自動実行\n\n"
-                "## プロンプト自動生成\n"
-                "1. **🏷️ プロンプト自動生成** タブで画像をアップロード\n"
-                "2. セクション名を入力して **タグ解析＆生成**\n"
-                "3. 結果を確認・編集して **メモファイルに追記**\n"
-                "4. WD14 Tagger 拡張が必要です"
-            )
+        with gr.Tab(t("tab_usage")):
+            gr.Markdown(t("usage_md"))
 
     return [(tab, "Random Composer", "random_composer_tab")]
 

@@ -22,25 +22,31 @@ Smart Img2Img Composer eliminates the hassle of manually changing prompts and ba
 - **conditional prompt injection system**: define custom dictionary rules to automatically inject stylistic tags when certain trigger words are found.
 - **fallback prompt support**: Automatically falls back to a `[default]` section if the image name doesn't match any specific block.
 - **automatic LoRA injection support**: Configure `lora:` blocks in your memo file, which automatically injects `<lora:name:weight>` only if the LoRA is actually installed.
-- **config.json persistence**: UI properties including fallback options and custom dictionaries are saved to `config.json` and persist across browser reloads.
+- **Complete Internationalization (i18n)**: All UI elements support English and Japanese.
+- **Auto-Prompt Generation (WD14 Tagger Integration)**: Analyze images and generate prompts automatically.
+- **Injection Stability (v2.1.2)**: Reliable prompt injection that works with batch generation and various WebUI versions.
+- **Smart Matching**: Selects the single best-matching prompt based on filename similarity score.
+- **Tag Deduplication**: Automatically cleans up redundant tags in the final prompt.
+- **Consolidated Settings**: All configurations are persisted to `config.json` and persist across browser reloads.
+- **Custom Dictionary**: Map specific tags or WD14 results to your own custom phrases.
 
 ## 📸 Screenshots
 
 ### ⚙️ Settings & Preview
 Configure your image folder, memo file, matching threshold, and preview results at a glance.
 
-![Settings & Preview](docs/images/ui_settings.png)
+![Settings & Preview](docs/images/ui_settings_en.png)
 
 ### 🏷️ Prompt Auto-Generation (WD14 Tagger)
 Upload an image to auto-extract tags with smart category filtering — composition, pose, lighting, NSFW, and more.
 
-![Prompt Auto-Generation](docs/images/ui_prompt_gen.png)
+![Prompt Auto-Generation](docs/images/ui_prompt_gen_en.png)
 
 ### 🎲 img2img Integration
 Enable the extension directly in the img2img tab with a single checkbox. It works seamlessly alongside other scripts.
 You can also toggle auto-resizing and configure the base resolution via a slider to optimize sizing for your specific SD model.
 
-![img2img Integration](docs/images/ui_img2img.png)
+![img2img Integration](docs/images/ui_img2img_en.png)
 
 ---
 
