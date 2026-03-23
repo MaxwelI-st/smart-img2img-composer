@@ -27,7 +27,7 @@ Smart Img2Img Composer eliminates the hassle of manually changing prompts and ba
 - **Injection Stability (v2.1.2)**: Reliable prompt injection that works with batch generation and various WebUI versions.
 - **Smart Matching**: Selects the single best-matching prompt based on filename similarity score.
 - **Tag Deduplication**: Automatically cleans up redundant tags in the final prompt.
-- **Integrated LoRA Manager (NEW v2.2.0)**: Manage Character and Situation LoRA lists in a dedicated tab. Randomly inject them during img2img generation.
+- **Integrated LoRA Manager (v2.2.2)**: Manage Character and Situation LoRA lists in a dedicated tab. Supports **one-by-one appending** (with automatic newline) and random injection during img2img generation.
 - **Consolidated Settings**: All configurations are persisted to `config.json` and persist across browser reloads.
 - **Custom Dictionary**: Map specific tags or WD14 results to your own custom phrases.
 
@@ -38,8 +38,8 @@ Configure your image folder, memo file, matching threshold, and preview results 
 
 ![Settings & Preview](docs/images/ui_settings_en.png)
 
-### 🏷️ LoRA Manager (NEW)
-Register and edit your Character or Situation LoRA lists. These saved lists are randomly sampled and applied during the img2img process.
+### 🏷️ LoRA Manager
+Register and edit your Character or Situation LoRA lists. You can easily append new entries one by one using the dedicated input form (automatic newline insertion), or edit the entire list directly in the text area.
 
 ![LoRA Manager](docs/images/ui_lora_manager_en.png)
 
@@ -77,8 +77,9 @@ You can also toggle auto-resizing and configure the base resolution via a slider
 
 ### 3. Register LoRAs in LoRA Manager
 1. Go to the "**🏷️ LoRA Manager**" tab.
-2. Select "Character" or "Situation" and enter your LoRA triggers (e.g., `<lora:my_character:0.8>, 1girl, ...`), one per line. Click **Save**.
-3. In the img2img tab's Smart Img2Img Composer accordion, check "**🎲 Random Character LoRA**" etc. A random LoRA from your list will be injected on each generation.
+2. Select "Character" or "Situation" and enter your LoRA trigger (e.g., `<lora:my_character:0.8>, 1girl`) in the **"Add one by one"** form, then click "➕ Append to List". It will be added to the end of the file with a newline.
+3. Alternatively, you can edit the entire list in the large text area below and click "💾 Save List".
+4. In the img2img tab's Smart Img2Img Composer accordion, check "**🎲 Random Character LoRA**" etc. A random LoRA from your list will be injected on each generation.
 
 ### 4. Direct file editing (Advanced)
 You can directly edit and save the following files in the extension folder:
