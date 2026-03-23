@@ -23,6 +23,23 @@ Smart Img2Img Composer eliminates the hassle of manually changing prompts and ba
 - **automatic LoRA injection support**: Configure `lora:` blocks in your memo file, which automatically injects `<lora:name:weight>` only if the LoRA is actually installed.
 - **config.json persistence**: UI properties including fallback options and custom dictionaries are saved to `config.json` and persist across browser reloads.
 
+## 📸 Screenshots
+
+### ⚙️ Settings & Preview
+Configure your image folder, memo file, matching threshold, and preview results at a glance.
+
+![Settings & Preview](docs/images/ui_settings.png)
+
+### 🏷️ Prompt Auto-Generation (WD14 Tagger)
+Upload an image to auto-extract tags with smart category filtering — composition, pose, lighting, NSFW, and more.
+
+![Prompt Auto-Generation](docs/images/ui_prompt_gen.png)
+
+### 🎲 img2img Integration
+Enable the extension directly in the img2img tab with a single checkbox. It works seamlessly alongside other scripts.
+
+![img2img Integration](docs/images/ui_img2img.png)
+
 ---
 
 ## 🛠️ Installation
