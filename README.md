@@ -16,6 +16,7 @@ Smart Img2Img Composer eliminates the hassle of manually changing prompts and ba
 ## ✨ Features
 - **Random image selection**: Randomly picks an image from your specified input folder for img2img.
 - **Filename-based prompt matching**: Matches the filename (either exact or partial match based on threshold) to a prompt block in your memo file.
+- **Auto-resize dimension optimization**: Automatically scales images while maintaining aspect ratio, with a customizable base resolution slider (512px - 2048px) depending on your model (e.g., SD1.5 or SDXL/Illustrious).
 - **positive / negative prompt support**: Supports writing distinct positive and negative prompts in the memo file.
 - **WD14 Tagger integration**: Built-in tab to auto-generate prompts from your reference images using WD14 Tagger, with smart category filtering.
 - **conditional prompt injection system**: define custom dictionary rules to automatically inject stylistic tags when certain trigger words are found.
@@ -37,6 +38,7 @@ Upload an image to auto-extract tags with smart category filtering — compositi
 
 ### 🎲 img2img Integration
 Enable the extension directly in the img2img tab with a single checkbox. It works seamlessly alongside other scripts.
+You can also toggle auto-resizing and configure the base resolution via a slider to optimize sizing for your specific SD model.
 
 ![img2img Integration](docs/images/ui_img2img.png)
 
