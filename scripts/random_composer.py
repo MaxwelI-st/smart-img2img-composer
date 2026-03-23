@@ -918,6 +918,8 @@ def append_to_memo(memo_path, entry):
 # ======================================================================
 
 class RandomComposerScript(scripts.Script):
+    # Dynamic Promptsなどの他スクリプトよりも先に実行させるため、優先度を低く設定
+    sorting_priority = -100
 
     def title(self):
         return "Smart Img2Img Composer"
@@ -1019,11 +1021,6 @@ class RandomComposerScript(scripts.Script):
                     p.negative_prompt = f"{p.negative_prompt}, {negative}"
                 else:
                     p.negative_prompt = negative
-
-        if hasattr(p, "all_prompts") and p.all_prompts:
-            p.all_prompts = [p.prompt] * len(p.all_prompts)
-        if hasattr(p, "all_negative_prompts") and p.all_negative_prompts:
-            p.all_negative_prompts = [p.negative_prompt] * len(p.all_negative_prompts)
 
         print(f"[Smart Img2Img Composer]\n{log}")
 
