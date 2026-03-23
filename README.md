@@ -1,9 +1,17 @@
 # 🎲 Smart Img2Img Composer
 
+![Smart Img2Img Composer Banner](docs/images/hero_banner.png)
+
 An extension for AUTOMATIC1111 Stable Diffusion WebUI. It randomly selects an image from a specified folder, automatically matches and assigns a prompt based on the image's filename, and seamlessly injects it into img2img.
 
 ## 🌟 Overview
 Smart Img2Img Composer eliminates the hassle of manually changing prompts and base images when performing large batch img2img operations. By preparing a `memo file` (a prompt dictionary), the extension will automatically pick up the appropriate tags and send them to generating pipeline, making batch processing highly efficient and varied. 
+
+![Feature Overview](docs/images/feature_overview.png)
+
+### How it works
+
+![Workflow Diagram](docs/images/workflow_diagram.png)
 
 ## ✨ Features
 - **Random image selection**: Randomly picks an image from your specified input folder for img2img.
