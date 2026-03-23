@@ -50,6 +50,276 @@ IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff"}
 
 
 # ======================================================================
+# i18n 翻訳辞書
+# ======================================================================
+
+_I18N = {
+    # --- img2img アコーディオン ---
+    "accordion_desc": {
+        "en": "**Check Enable → Click Generate.** Settings are saved in 'Smart Img2Img Composer' tab.",
+        "ja": "**有効化 → Generate で自動実行。** 設定は「Smart Img2Img Composer」タブで保存。",
+    },
+    "enable": {
+        "en": "✅ Enable (Auto-inject image & prompt)",
+        "ja": "✅ 有効化（生成時に自動で画像＋プロンプト投入）",
+    },
+    "selection_mode": {
+        "en": "🖼️ Image Selection Mode",
+        "ja": "🖼️ 画像の選択モード",
+    },
+    "sel_random": {
+        "en": "Random",
+        "ja": "ランダムに選ぶ",
+    },
+    "sel_sequential": {
+        "en": "Sequential (One by one in alphabetical order)",
+        "ja": "フォルダ内の順番通りに1枚ずつ選ぶ",
+    },
+    "overwrite_prompt": {
+        "en": "Overwrite Prompt (If OFF, append to existing)",
+        "ja": "プロンプトを上書き（OFFなら既存の末尾に追加）",
+    },
+    "resize_mode": {
+        "en": "📐 Auto-Resize Mode",
+        "ja": "📐 画像サイズ自動調整モード",
+    },
+    "resize_none": {
+        "en": "Do not resize (Use WebUI size)",
+        "ja": "変更しない (WebUIのサイズを使用)",
+    },
+    "resize_slider": {
+        "en": "▼ Force long edge to slider value",
+        "ja": "▼ スライダー設定値に長辺を強制する",
+    },
+    "resize_512": {
+        "en": "▼ Smart Resize: 512~1024 (SD1.5)",
+        "ja": "▼ 元サイズ維持: 512〜1024 の範囲に収める (SD1.5)",
+    },
+    "resize_1024": {
+        "en": "▼ Smart Resize: 1024~1536 (SDXL)",
+        "ja": "▼ 元サイズ維持: 1024〜1536 の範囲に収める (SDXL)",
+    },
+    "resize_1536": {
+        "en": "▼ Smart Resize: 1536~1792 (High-Res)",
+        "ja": "▼ 元サイズ維持: 1536〜1792 の範囲に収める (高画質)",
+    },
+    "base_resolution": {
+        "en": "📏 Base Resolution (Only valid for 'Force long edge')",
+        "ja": "📏 ベース解像度（「長辺を強制する」モード時のみ有効）",
+    },
+    # --- 独立タブ: 設定 & プレビュー ---
+    "tab_header": {
+        "en": "Random image → Auto-fetch prompts → Feed to img2img",
+        "ja": "ランダム画像 → プロンプト自動取得 → img2img へ投入",
+    },
+    "tab_settings": {
+        "en": "⚙️ Settings & Preview",
+        "ja": "⚙️ 設定 & プレビュー",
+    },
+    "h_settings": {
+        "en": "### ⚙️ Settings",
+        "ja": "### ⚙️ 設定",
+    },
+    "image_folder": {
+        "en": "📁 Image Folder",
+        "ja": "📁 画像フォルダ",
+    },
+    "image_folder_ph": {
+        "en": "ex: C:/images/input",
+        "ja": "例: C:/images/input",
+    },
+    "memo_file": {
+        "en": "📄 Memo File",
+        "ja": "📄 メモファイル",
+    },
+    "memo_file_ph": {
+        "en": "ex: C:/images/memo.txt",
+        "ja": "例: C:/images/memo.txt",
+    },
+    "match_threshold": {
+        "en": "🎯 Match Threshold (0.0=Exact, 0.4=Loose)",
+        "ja": "🎯 一致率 (0.0=完全一致, 0.4=あいまい)",
+    },
+    "generation_count": {
+        "en": "🔄 Generation Count (Internal Batch)",
+        "ja": "🔄 生成回数",
+    },
+    "fallback_enabled": {
+        "en": "☑ Fallback Enabled (Use [default] if not matched)",
+        "ja": "☑ フォールバック有効 (該当なしで[default]を使用)",
+    },
+    "auto_lora": {
+        "en": "☑ Auto LoRA Injection Enabled",
+        "ja": "☑ auto LoRA injection 有効",
+    },
+    "btn_save": {
+        "en": "💾 Save",
+        "ja": "💾 保存",
+    },
+    "btn_preview": {
+        "en": "👁️ Preview",
+        "ja": "👁️ プレビュー",
+    },
+    "status": {
+        "en": "Status",
+        "ja": "ステータス",
+    },
+    "h_preview": {
+        "en": "### 👁️ Preview Results",
+        "ja": "### 👁️ プレビュー結果",
+    },
+    "selected_image": {
+        "en": "Selected Image",
+        "ja": "選択画像",
+    },
+    "positive_prompt": {
+        "en": "📝 Positive Prompt",
+        "ja": "📝 Positive",
+    },
+    "negative_prompt": {
+        "en": "🚫 Negative Prompt",
+        "ja": "🚫 Negative",
+    },
+    "log": {
+        "en": "Log",
+        "ja": "ログ",
+    },
+    # --- 独立タブ: プロンプト自動生成 ---
+    "tab_prompt_gen": {
+        "en": "🏷️ Auto-Prompt Gen",
+        "ja": "🏷️ プロンプト自動生成",
+    },
+    "prompt_gen_desc": {
+        "en": "### 🏷️ Auto generate prompts with WD14 Tagger\nUpload image → Extract scene/pose/composition tags ONLY → Append to memo file\n\n**(Character traits and clothes are automatically EXCLUDED)**",
+        "ja": "### 🏷️ WD14 Tagger で自動プロンプト生成\n画像をアップロード → シーン/ポーズ/構図のタグだけ抽出 → メモファイルに追記\n\n**服装・人物特徴は自動除外されます。**",
+    },
+    "target_image": {
+        "en": "📸 Target Image",
+        "ja": "📸 解析する画像",
+    },
+    "section_name": {
+        "en": "📌 Section Name",
+        "ja": "📌 セクション名",
+    },
+    "section_ph": {
+        "en": "ex: title1",
+        "ja": "例: タイトル1",
+    },
+    "section_info": {
+        "en": "Becomes [section_name] in memo file",
+        "ja": "メモファイルの [セクション名] になる",
+    },
+    "h_categories": {
+        "en": "### 🏷️ Target Categories (Only checked types extracted)",
+        "ja": "### 🏷️ 抽出するタグの種類（チェックした種類のタグだけを抽出します）",
+    },
+    "cat_base": {
+        "en": "🖼️ Base (Composition, Backgrounds)",
+        "ja": "🖼️ 基本カテゴリ (構図・背景など)",
+    },
+    "cat_char": {
+        "en": "👩 Character Detail (Hair, Clothes)",
+        "ja": "👩 人物・詳細カテゴリ (髪型・服装など)",
+    },
+    "cat_nsfw": {
+        "en": "🔞 NSFW & Fetish (Actions, Fluids)",
+        "ja": "🔞 特殊・NSFWカテゴリ (行為・アイテム等)",
+    },
+    "confidence": {
+        "en": "🎯 Tag Confidence Threshold",
+        "ja": "🎯 タグ信頼度しきい値",
+    },
+    "confidence_info": {
+        "en": "Lower = more tags",
+        "ja": "低いほど多くのタグが含まれる",
+    },
+    "default_positive": {
+        "en": "✨ Default Positive",
+        "ja": "✨ デフォルトポジティブ",
+    },
+    "default_positive_info": {
+        "en": "Prepended to output",
+        "ja": "抽出されたタグの先頭に自動で付与されるベースプロンプト",
+    },
+    "custom_dict": {
+        "en": "📚 Custom Dictionary",
+        "ja": "📚 好みのプロンプト置き場（条件付与）",
+    },
+    "custom_dict_info": {
+        "en": "Format: `condition tag > prompt to add` (Added only if condition matched in image)",
+        "ja": "「条件タグ > 追加したいプロンプト」の形式で記述 (複数行可)。画像から条件タグが出た時のみ追加されます。",
+    },
+    "default_negative": {
+        "en": "🚫 Default Negative",
+        "ja": "🚫 デフォルトネガティブ",
+    },
+    "default_negative_info": {
+        "en": "Appended to output",
+        "ja": "自動生成時に追加するネガティブプロンプト",
+    },
+    "btn_gen_tags": {
+        "en": "🏷️ Generate Tags",
+        "ja": "🏷️ タグ解析＆生成",
+    },
+    "btn_send_img2img": {
+        "en": "🚀 Send to img2img",
+        "ja": "🚀 img2imgに送る",
+    },
+    "btn_append_memo": {
+        "en": "📝 Append to Memo",
+        "ja": "📝 メモファイルに追記",
+    },
+    "btn_save_settings": {
+        "en": "💾 Save Settings",
+        "ja": "💾 設定を保存",
+    },
+    "generated_entry": {
+        "en": "✨ Generated Memo Entry",
+        "ja": "✨ 生成されたメモエントリ",
+    },
+    "generated_entry_info": {
+        "en": "Edit before appending (remove unwanted tags)",
+        "ja": "編集してからメモファイルに追記できます(不要なタグがあればここで削除)",
+    },
+    "analysis_log": {
+        "en": "Analysis Log",
+        "ja": "解析ログ",
+    },
+    "append_status": {
+        "en": "Append Status",
+        "ja": "追記ステータス",
+    },
+    "no_images": {
+        "en": "❌ No images found in the folder",
+        "ja": "❌ 画像フォルダに画像がありません",
+    },
+    # --- 言語設定UI ---
+    "language_label": {
+        "en": "🌐 Language / 言語",
+        "ja": "🌐 Language / 言語",
+    },
+}
+
+
+def _get_lang() -> str:
+    """config.jsonからlanguage設定を読み取る (デフォルト: ja)"""
+    try:
+        if os.path.exists(CONFIG_PATH):
+            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                return json.load(f).get("language", "ja")
+    except Exception:
+        pass
+    return "ja"
+
+
+def t(key: str) -> str:
+    """翻訳キーを現在の言語に変換して返す"""
+    lang = _get_lang()
+    entry = _I18N.get(key, {})
+    return entry.get(lang, entry.get("en", key))
+
+
+# ======================================================================
 # 設定管理
 # ======================================================================
 
@@ -218,9 +488,9 @@ def compose_prompt(image_folder: str, memo_file: str, match_threshold: float, se
 
     image_files = get_image_files(image_folder)
     if not image_files:
-        return None, "", "", "❌ No images found in the folder"
+        return None, "", "", t("no_images")
 
-    if "Sequential" in selection_mode:
+    if selection_mode and ("Sequential" in selection_mode or "順番" in selection_mode):
         last_index = config.get("last_sequential_index", 0)
         index = last_index % len(image_files)
         selected = image_files[index]
@@ -301,9 +571,10 @@ def preview_compose(image_folder, memo_file, match_threshold):
     return img, positive, negative, log
 
 
-def save_settings(image_folder, memo_file, match_threshold, generation_count, fallback, auto_lora):
+def save_settings(language, image_folder, memo_file, match_threshold, generation_count, fallback, auto_lora):
     config = load_config()
     config.update({
+        "language": language,
         "image_folder": image_folder,
         "memo_file": memo_file,
         "match_threshold": match_threshold,
@@ -939,47 +1210,49 @@ class RandomComposerScript(scripts.Script):
         if not is_img2img:
             return []
         with gr.Accordion("🎲 Smart Img2Img Composer", open=False, elem_id="smart_composer_accordion"):
-            gr.Markdown(
-                "**Check Enable → Click Generate.** Settings are saved in 'Smart Img2Img Composer' tab."
-            )
+            gr.Markdown(t("accordion_desc"))
             enabled = gr.Checkbox(
-                label="✅ Enable (Auto-inject image & prompt)",
+                label=t("enable"),
                 value=False,
                 elem_id="smart_composer_enabled",
             )
+            # 画像選択モード: 内部キー "random" / "sequential" を使い、表示は翻訳
+            _sel_choices = [t("sel_random"), t("sel_sequential")]
             selection_mode = gr.Radio(
-                label="🖼️ Image Selection Mode",
-                choices=["Random", "Sequential (One by one in alphabetical order)"],
-                value="Random",
+                label=t("selection_mode"),
+                choices=_sel_choices,
+                value=_sel_choices[0],
                 elem_id="smart_composer_selection_mode",
             )
             override_prompt = gr.Checkbox(
-                label="Overwrite Prompt (If OFF, append to existing)",
+                label=t("overwrite_prompt"),
                 value=True,
                 elem_id="smart_composer_override",
             )
+            # リサイズモード: 内部判定はインデックスで行う
+            _resize_choices = [
+                t("resize_none"),
+                t("resize_slider"),
+                t("resize_512"),
+                t("resize_1024"),
+                t("resize_1536"),
+            ]
             resize_mode = gr.Dropdown(
-                label="📐 Auto-Resize Mode",
-                choices=[
-                    "Do not resize (Use WebUI size)",
-                    "▼ Force long edge to slider value",
-                    "▼ Smart Resize: 512~1024 (SD1.5)",
-                    "▼ Smart Resize: 1024~1536 (SDXL)",
-                    "▼ Smart Resize: 1536~1792 (High-Res)",
-                ],
-                value="Do not resize (Use WebUI size)",
+                label=t("resize_mode"),
+                choices=_resize_choices,
+                value=_resize_choices[0],
                 elem_id="smart_composer_resize_mode",
             )
             base_resolution = gr.Slider(
-                label="📏 Base Resolution (Only valid for 'Force long edge')",
+                label=t("base_resolution"),
                 minimum=512, maximum=2048, step=64,
                 value=1024,
                 elem_id="smart_composer_base_resolution",
             )
         return [enabled, override_prompt, resize_mode, base_resolution, selection_mode]
 
-    def before_process(self, p: processing.StableDiffusionProcessing, enabled, override_prompt, resize_mode="Do not resize (Use WebUI size)", base_resolution=1024, selection_mode="Random"):
-        """before_process のみでプロンプト注入を行う（二重実行防止）"""
+    def before_process(self, p: processing.StableDiffusionProcessing, enabled, override_prompt, resize_mode="", base_resolution=1024, selection_mode=""):
+        """"before_process のみでプロンプト注入を行う（二重実行防止）"""
         if not enabled:
             return
 
@@ -1001,18 +1274,30 @@ class RandomComposerScript(scripts.Script):
                 p.init_images = [img]
                 
                 # 画像サイズ自動調整
-                if resize_mode and "Do not resize" not in resize_mode:
+                # リサイズモードのドロップダウンインデックスで判定
+                _resize_choices = [
+                    t("resize_none"),
+                    t("resize_slider"),
+                    t("resize_512"),
+                    t("resize_1024"),
+                    t("resize_1536"),
+                ]
+                resize_idx = -1
+                if resize_mode in _resize_choices:
+                    resize_idx = _resize_choices.index(resize_mode)
+                
+                if resize_idx > 0:  # 0 = "Do not resize"
                     mode_flag = "slider"
                     min_v, max_v = 1024, 1536
                     s_val = int(base_resolution) if base_resolution else 1024
                     
-                    if "512~1024" in resize_mode:
+                    if resize_idx == 2:  # 512~1024
                         mode_flag = "range"
                         min_v, max_v = 512, 1024
-                    elif "1024~1536" in resize_mode:
+                    elif resize_idx == 3:  # 1024~1536
                         mode_flag = "range"
                         min_v, max_v = 1024, 1536
-                    elif "1536~1792" in resize_mode:
+                    elif resize_idx == 4:  # 1536~1792
                         mode_flag = "range"
                         min_v, max_v = 1536, 1792
                         
@@ -1050,57 +1335,63 @@ def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as tab:
         gr.Markdown(
             "# 🎲 Smart Img2Img Composer\n"
-            "ランダム画像 → プロンプト自動取得 → img2img へ投入"
+            + t("tab_header")
         )
 
         # ─── 設定 & プレビュー ───
-        with gr.Tab("⚙️ Settings & Preview"):
+        with gr.Tab(t("tab_settings")):
             with gr.Row():
                 with gr.Column(scale=1):
-                    gr.Markdown("### ⚙️ Settings")
+                    gr.Markdown(t("h_settings"))
+                    # 言語設定
+                    language_selector = gr.Radio(
+                        label=t("language_label"),
+                        choices=["ja", "en"],
+                        value=lambda: load_config().get("language", "ja"),
+                    )
                     image_folder = gr.Textbox(
-                        label="📁 Image Folder",
-                        placeholder="ex: C:/images/input",
+                        label=t("image_folder"),
+                        placeholder=t("image_folder_ph"),
                         value=lambda: load_config().get("image_folder", ""),
                     )
                     memo_file = gr.Textbox(
-                        label="📄 Memo File",
-                        placeholder="ex: C:/images/memo.txt",
+                        label=t("memo_file"),
+                        placeholder=t("memo_file_ph"),
                         value=lambda: load_config().get("memo_file", ""),
                     )
                     match_threshold = gr.Slider(
-                        label="🎯 Match Threshold (0.0=Exact, 0.4=Loose)",
+                        label=t("match_threshold"),
                         minimum=0.0, maximum=1.0, step=0.05,
                         value=lambda: load_config().get("match_threshold", 0.3),
                     )
                     generation_count = gr.Slider(
-                        label="🔄 Generation Count (Internal Batch)",
+                        label=t("generation_count"),
                         minimum=1, maximum=100, step=1,
                         value=lambda: load_config().get("generation_count", 1),
                     )
                     fallback_enabled = gr.Checkbox(
-                        label="☑ Fallback Enabled (Use [default] if not matched)",
+                        label=t("fallback_enabled"),
                         value=lambda: load_config().get("fallback_enabled", True),
                     )
                     auto_lora_enabled = gr.Checkbox(
-                        label="☑ Auto LoRA Injection Enabled",
+                        label=t("auto_lora"),
                         value=lambda: load_config().get("auto_lora_enabled", True),
                     )
                     with gr.Row():
-                        save_btn = gr.Button("💾 Save", variant="primary")
-                        preview_btn = gr.Button("👁️ Preview", variant="secondary")
-                    save_status = gr.Textbox(label="Status", interactive=False, max_lines=1)
+                        save_btn = gr.Button(t("btn_save"), variant="primary")
+                        preview_btn = gr.Button(t("btn_preview"), variant="secondary")
+                    save_status = gr.Textbox(label=t("status"), interactive=False, max_lines=1)
 
                 with gr.Column(scale=1):
-                    gr.Markdown("### 👁️ Preview Results")
-                    preview_image = gr.Image(label="Selected Image", type="pil", interactive=False)
-                    preview_positive = gr.Textbox(label="📝 Positive Prompt", interactive=False, lines=3)
-                    preview_negative = gr.Textbox(label="🚫 Negative Prompt", interactive=False, lines=2)
-                    preview_log = gr.Textbox(label="Log", interactive=False, lines=6)
+                    gr.Markdown(t("h_preview"))
+                    preview_image = gr.Image(label=t("selected_image"), type="pil", interactive=False)
+                    preview_positive = gr.Textbox(label=t("positive_prompt"), interactive=False, lines=3)
+                    preview_negative = gr.Textbox(label=t("negative_prompt"), interactive=False, lines=2)
+                    preview_log = gr.Textbox(label=t("log"), interactive=False, lines=6)
 
             save_btn.click(
                 fn=save_settings,
-                inputs=[image_folder, memo_file, match_threshold, generation_count, fallback_enabled, auto_lora_enabled],
+                inputs=[language_selector, image_folder, memo_file, match_threshold, generation_count, fallback_enabled, auto_lora_enabled],
                 outputs=[save_status],
             )
             preview_btn.click(
@@ -1110,44 +1401,40 @@ def on_ui_tabs():
             )
 
         # ─── プロンプト自動生成 ───
-        with gr.Tab("🏷️ Auto-Prompt Gen"):
-            gr.Markdown(
-                "### 🏷️ Auto generate prompts with WD14 Tagger\n"
-                "Upload image → Extract scene/pose/composition tags ONLY → Append to memo file\n\n"
-                "**(Character traits and clothes are automatically EXCLUDED)**"
-            )
+        with gr.Tab(t("tab_prompt_gen")):
+            gr.Markdown(t("prompt_gen_desc"))
 
             with gr.Row():
                 with gr.Column(scale=1):
                     gen_image = gr.Image(
-                        label="📸 Target Image",
+                        label=t("target_image"),
                         type="pil",
                         interactive=True,
                     )
                     gen_section = gr.Textbox(
-                        label="📌 Section Name",
-                        placeholder="ex: title1",
-                        info="Becomes [section_name] in memo file",
+                        label=t("section_name"),
+                        placeholder=t("section_ph"),
+                        info=t("section_info"),
                     )
                     # --- アコーディオン化されたタグカテゴリ ---
                     _cat_base = ["構図・カメラ", "ポーズ・アクション", "背景・場所", "自然・天候", "照明", "雰囲気", "メタタグ"]
                     _cat_char = ["人物・基本属性", "髪型・顔周り", "表情・口", "服装・靴・装飾品"]
                     _cat_nsfw = ["🎭 行為・アクション", "🦑 クリーチャー・追加キャラ", "🧸 アイテム・玩具", "🔞 特殊構図・フォーカス", "💦 体液・汚れ系", "🥵 表情・フェティッシュ状態", "👗 衣服の乱れ・着脱", "🍆 局所・モザイク"]
                     
-                    gr.Markdown("### 🏷️ Target Categories (Only checked types extracted)")
-                    with gr.Accordion("🖼️ Base (Composition, Backgrounds)", open=True):
+                    gr.Markdown(t("h_categories"))
+                    with gr.Accordion(t("cat_base"), open=True):
                         gen_cat_base = gr.CheckboxGroup(
                             choices=_cat_base,
                             value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_base],
                             show_label=False
                         )
-                    with gr.Accordion("👩 Character Detail (Hair, Clothes)", open=False):
+                    with gr.Accordion(t("cat_char"), open=False):
                         gen_cat_char = gr.CheckboxGroup(
                             choices=_cat_char,
                             value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_char],
                             show_label=False
                         )
-                    with gr.Accordion("🔞 NSFW & Fetish (Actions, Fluids)", open=False):
+                    with gr.Accordion(t("cat_nsfw"), open=False):
                         gen_cat_nsfw = gr.CheckboxGroup(
                             choices=_cat_nsfw,
                             value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_nsfw],
@@ -1155,35 +1442,35 @@ def on_ui_tabs():
                         )
                     # --------------------------------------
                     gen_confidence = gr.Slider(
-                        label="🎯 Tag Confidence Threshold",
+                        label=t("confidence"),
                         minimum=0.1, maximum=0.9, step=0.05,
                         value=lambda: load_config().get("gen_confidence", 0.35),
-                        info="Lower = more tags",
+                        info=t("confidence_info"),
                     )
                     gen_positive = gr.Textbox(
-                        label="✨ Default Positive",
+                        label=t("default_positive"),
                         value=lambda: load_config().get("gen_positive", "(masterpiece:1.1), (best quality:1.0), "),
                         lines=2,
-                        info="Prepended to output",
+                        info=t("default_positive_info"),
                     )
                     gen_custom_dict = gr.Textbox(
-                        label="📚 Custom Dictionary",
+                        label=t("custom_dict"),
                         value=lambda: load_config().get("gen_custom_dict", "night, city > cyberpunk cityscape, neon lights, highly detailed, vivid colors\n1girl, smile > beautiful detailed eyes, glowing smile"),
                         lines=3,
-                        info="Format: `condition tag > prompt to add` (Added only if condition matched in image)",
+                        info=t("custom_dict_info"),
                     )
                     gen_negative = gr.Textbox(
-                        label="🚫 Default Negative",
+                        label=t("default_negative"),
                         value=lambda: load_config().get("gen_negative", "lowres, blurry, artifact, bad anatomy, worst quality, low quality, jpeg artifacts"),
                         lines=2,
-                        info="Appended to output",
+                        info=t("default_negative_info"),
                     )
                     with gr.Row():
-                        gen_btn = gr.Button("🏷️ Generate Tags", variant="primary")
-                        send_to_img2img_btn = gr.Button("🚀 Send to img2img", variant="primary")
+                        gen_btn = gr.Button(t("btn_gen_tags"), variant="primary")
+                        send_to_img2img_btn = gr.Button(t("btn_send_img2img"), variant="primary")
                     with gr.Row():
-                        append_btn = gr.Button("📝 Append to Memo", variant="secondary")
-                        gen_save_btn = gr.Button("💾 Save Settings", variant="secondary")
+                        append_btn = gr.Button(t("btn_append_memo"), variant="secondary")
+                        gen_save_btn = gr.Button(t("btn_save_settings"), variant="secondary")
 
                 try:
                     from modules import generation_parameters_copypaste as params_copypaste
@@ -1197,24 +1484,24 @@ def on_ui_tabs():
 
                 with gr.Column(scale=1):
                     gen_output = gr.Textbox(
-                        label="✨ Generated Memo Entry",
+                        label=t("generated_entry"),
                         interactive=True,
                         lines=10,
-                        info="Edit before appending (remove unwanted tags)",
+                        info=t("generated_entry_info"),
                     )
                     gen_log = gr.Textbox(
-                        label="Analysis Log",
+                        label=t("analysis_log"),
                         interactive=False,
                         lines=8,
                     )
                     with gr.Row():
                         append_status = gr.Textbox(
-                            label="Append Status",
+                            label=t("append_status"),
                             interactive=False,
                             max_lines=1,
                         )
                         gen_save_status = gr.Textbox(
-                            label="保存ステータス",
+                            label=t("status"),
                             interactive=False,
                             max_lines=1,
                         )
@@ -1223,6 +1510,12 @@ def on_ui_tabs():
                     hidden_gen_neg = gr.Textbox(visible=False)
                     hidden_gen_w = gr.Textbox(visible=False)
                     hidden_gen_h = gr.Textbox(visible=False)
+
+            gen_save_btn.click(
+                fn=save_settings,
+                inputs=[language_selector, image_folder, memo_file, match_threshold, generation_count, fallback_enabled, auto_lora_enabled],
+                outputs=[gen_save_status],
+            )
 
             gen_btn.click(
                 fn=autogen_prompt,
