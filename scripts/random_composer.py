@@ -946,9 +946,8 @@ class RandomComposerScript(scripts.Script):
             try:
                 img = Image.open(selected).convert("RGB")
                 p.init_images = [img]
-                new_w, new_h = get_stable_dimensions(img)
-                p.width = new_w
-                p.height = new_h
+                # 解像度はユーザーのUI設定をそのまま使用
+                # （SD1.5で1024px等に強制すると顔や目が崩れるため）
             except Exception as e:
                 print(f"[Smart Img2Img Composer] 画像読み込み失敗: {e}")
 
