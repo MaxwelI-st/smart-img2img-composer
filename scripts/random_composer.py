@@ -305,22 +305,6 @@ _I18N = {
         "en": "📝 Append to Memo",
         "ja": "📝 メモファイルに追記",
     },
-    "btn_save_settings": {
-        "en": "💾 Save Settings",
-        "ja": "💾 設定を保存",
-    },
-    "generated_entry": {
-        "en": "✨ Generated Memo Entry",
-        "ja": "✨ 生成されたメモエントリ",
-    },
-    "generated_entry_info": {
-        "en": "Edit before appending (remove unwanted tags)",
-        "ja": "編集してからメモファイルに追記できます(不要なタグがあればここで削除)",
-    },
-    "analysis_log": {
-        "en": "Analysis Log",
-        "ja": "解析ログ",
-    },
     "append_status": {
         "en": "Append Status",
         "ja": "追記ステータス",
@@ -341,13 +325,29 @@ _I18N = {
     "log_sections_count": {"en": "📖 Sections count: {count}", "ja": "📖 メモセクション数: {count}"},
     "log_fallback": {"en": "⚠️ Fallback to [default] section", "ja": "⚠️ 一致しないため [default] セクションへフォールバックします"},
     "log_no_match": {"en": "⚠️ No matching section found", "ja": "⚠️ 一致するセクションが見つかりませんでした"},
-    "log_match_count": {"en": "✅ Match count: {count}", "ja": "✅ 一致数: {count}件"},
+    "log_random_lora": {"en": "🎲 Random LoRA applied: {lora}", "ja": "🎲 ランダムLoRA適用: {lora}"},
+    "log_match_count": {"en": "✅ Matched sections: {count}", "ja": "✅ 一致セクション数: {count}"},
+    "tab_lora_manager": {"en": "🏷️ LoRA Manager", "ja": "🏷️ LoRAマネージャー"},
+    "lora_manager_desc": {
+        "en": "Register and manage your Character/Situation LoRAs. You can also edit the .txt files directly.",
+        "ja": "キャラクターやシチュエーションのLoRAリストを管理します。拡張機能内の.txtファイルを直接編集することも可能です。"
+    },
+    "lora_type": {"en": "LoRA Category", "ja": "LoRAカテゴリ"},
+    "lora_type_char": {"en": "Character", "ja": "キャラクター"},
+    "lora_type_sit": {"en": "Situation", "ja": "シチュエーション"},
+    "lora_list_label": {"en": "LoRA List (one per line)", "ja": "LoRAリスト（1行に1つ）"},
+    "lora_input_label": {"en": "New LoRA entry", "ja": "1件ずつ追加"},
+    "btn_append_lora": {"en": "➕ Append to List", "ja": "➕ リストに追記"},
+    "btn_save_lora_list": {"en": "💾 Save List", "ja": "💾 リストを保存"},
+    "msg_lora_saved": {"en": "LoRA list saved!", "ja": "LoRAリストを保存しました。"},
+    "msg_lora_appended": {"en": "Appended!", "ja": "追記しました！"},
+    "enable_random_char": {"en": "🎲 Random Character LoRA", "ja": "🎲 キャラLoRAをランダム適用"},
+    "enable_random_sit": {"en": "🎲 Random Situation LoRA", "ja": "🎲 シチュLoRAをランダム適用"},
     "log_all_tags": {"en": "📊 Total tags: {count}", "ja": "📊 全タグ数: {count}"},
     "log_filtered_tags": {"en": "✅ Filtered: {count}", "ja": "✅ フィルタ後: {count}"},
     "log_excluded_tags": {"en": "🗑️ Excluded: {count}", "ja": "🗑️ 除外タグ数: {count}"},
     "log_custom_match": {"en": "🎯 Custom match: [{cond}] => Added: {prompt}", "ja": "🎯 条件マッチ: [{cond}] => 追加: {prompt}"},
     "log_no_pos_prompt": {"en": "⚠️ No valid positive prompt", "ja": "⚠️ 有効なポジティブプロンプトがありません"},
-    
     # --- 使い方タブ ---
     "tab_usage": {"en": "📖 Usage", "ja": "📖 使い方"},
     "usage_md": {
@@ -1358,6 +1358,17 @@ class RandomComposerScript(scripts.Script):
                 value=False,
                 elem_id="smart_composer_enabled",
             )
+            with gr.Row():
+                enable_random_char = gr.Checkbox(
+                    label=t("enable_random_char"),
+                    value=False,
+                    elem_id="smart_composer_random_char",
+                )
+                enable_random_sit = gr.Checkbox(
+                    label=t("enable_random_sit"),
+                    value=False,
+                    elem_id="smart_composer_random_sit",
+                )
             # 画像選択モード: 内部キー "random" / "sequential" を使い、表示は翻訳
             _sel_choices = [(t("sel_random"), "random"), (t("sel_sequential"), "sequential")]
             selection_mode = gr.Radio(
@@ -1391,9 +1402,9 @@ class RandomComposerScript(scripts.Script):
                 value=1024,
                 elem_id="smart_composer_base_resolution",
             )
-        return [enabled, override_prompt, resize_mode, base_resolution, selection_mode]
+        return [enabled, override_prompt, resize_mode, base_resolution, selection_mode, enable_random_char, enable_random_sit]
 
-    def before_process(self, p: processing.StableDiffusionProcessing, enabled, override_prompt, resize_mode="", base_resolution=1024, selection_mode=""):
+    def before_process(self, p: processing.StableDiffusionProcessing, enabled, override_prompt, resize_mode="", base_resolution=1024, selection_mode="", enable_random_char=False, enable_random_sit=False):
         """before_process メソッドでプロンプト注入を行う。
         getattr(p, '_smart_composer_processed', False) を使って二重実行を防止する。
         """
@@ -1411,6 +1422,37 @@ class RandomComposerScript(scripts.Script):
             config.get("match_threshold", 0.3),
             selection_mode
         )
+        
+        log_list = [log] if log else []
+
+        # ランダムLoRAの読み込みと注入
+        def get_random_lora(filename):
+            path = os.path.join(EXTENSION_DIR, filename)
+            if os.path.exists(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    lines = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
+                if lines:
+                    return random.choice(lines)
+            return None
+
+        additional_prompts = []
+        if enable_random_char:
+            lora = get_random_lora("lora_char.txt")
+            if lora:
+                additional_prompts.append(lora)
+                log_list.append(t("log_random_lora").format(lora=lora))
+        
+        if enable_random_sit:
+            lora = get_random_lora("lora_sit.txt")
+            if lora:
+                additional_prompts.append(lora)
+                log_list.append(t("log_random_lora").format(lora=lora))
+        
+        if additional_prompts:
+            if positive:
+                positive = f"{positive}, {', '.join(additional_prompts)}"
+            else:
+                positive = ", ".join(additional_prompts)
 
         # 内部的な生成回数（Batch count）の設定
         generation_count = config.get("generation_count", 1)
@@ -1471,7 +1513,8 @@ class RandomComposerScript(scripts.Script):
             if hasattr(p, "all_negative_prompts") and p.all_negative_prompts:
                 p.all_negative_prompts = [inject(x, negative, override_prompt) for x in p.all_negative_prompts]
 
-        print(f"[Smart Img2Img Composer]\n{log}")
+        final_log = "\n".join(log_list)
+        print(f"[Smart Img2Img Composer]\n{final_log}")
         
         # 実行済みフラグをセット
         setattr(p, "_smart_composer_processed", True)
@@ -1490,218 +1533,248 @@ def on_ui_tabs():
             + t("tab_header")
         )
 
-        # ─── 設定 & プレビュー ───
-        with gr.Tab(t("tab_settings")):
-            with gr.Row():
-                with gr.Column(scale=1):
-                    gr.Markdown(t("h_settings"))
-                    # 言語設定
-                    language_selector = gr.Radio(
-                        label=t("language_label"),
-                        choices=["ja", "en"],
-                        value=lambda: load_config().get("language", "ja"),
-                    )
-                    image_folder = gr.Textbox(
-                        label=t("image_folder"),
-                        placeholder=t("image_folder_ph"),
-                        value=lambda: load_config().get("image_folder", ""),
-                    )
-                    memo_file = gr.Textbox(
-                        label=t("memo_file"),
-                        placeholder=t("memo_file_ph"),
-                        value=lambda: load_config().get("memo_file", ""),
-                    )
-                    match_threshold = gr.Slider(
-                        label=t("match_threshold"),
-                        minimum=0.0, maximum=1.0, step=0.05,
-                        value=lambda: load_config().get("match_threshold", 0.3),
-                    )
-                    generation_count = gr.Slider(
-                        label=t("generation_count"),
-                        minimum=1, maximum=100, step=1,
-                        value=lambda: load_config().get("generation_count", 1),
-                    )
-                    fallback_enabled = gr.Checkbox(
-                        label=t("fallback_enabled"),
-                        value=lambda: load_config().get("fallback_enabled", True),
-                    )
-                    auto_lora_enabled = gr.Checkbox(
-                        label=t("auto_lora"),
-                        value=lambda: load_config().get("auto_lora_enabled", True),
-                    )
-                    with gr.Row():
-                        save_btn = gr.Button(t("btn_save"), variant="primary")
-                        preview_btn = gr.Button(t("btn_preview"), variant="secondary")
-                    save_status = gr.Textbox(label=t("status"), interactive=False, max_lines=1)
+        with gr.Tabs() as tabs_root:
+            # ─── 設定 & プレビュー ───
+            with gr.Tab(t("tab_settings")):
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        gr.Markdown(t("h_settings"))
+                        # 言語設定
+                        language_selector = gr.Radio(
+                            label=t("language_label"),
+                            choices=["ja", "en"],
+                            value=lambda: load_config().get("language", "ja"),
+                        )
+                        image_folder = gr.Textbox(
+                            label=t("image_folder"),
+                            placeholder=t("image_folder_ph"),
+                            value=lambda: load_config().get("image_folder", ""),
+                        )
+                        memo_file = gr.Textbox(
+                            label=t("memo_file"),
+                            placeholder=t("memo_file_ph"),
+                            value=lambda: load_config().get("memo_file", ""),
+                        )
+                        match_threshold = gr.Slider(
+                            label=t("match_threshold"),
+                            minimum=0.0, maximum=1.0, step=0.05,
+                            value=lambda: load_config().get("match_threshold", 0.3),
+                        )
+                        generation_count = gr.Slider(
+                            label=t("generation_count"),
+                            minimum=1, maximum=100, step=1,
+                            value=lambda: load_config().get("generation_count", 1),
+                        )
+                        fallback_enabled = gr.Checkbox(
+                            label=t("fallback_enabled"),
+                            value=lambda: load_config().get("fallback_enabled", True),
+                        )
+                        auto_lora_enabled = gr.Checkbox(
+                            label=t("auto_lora"),
+                            value=lambda: load_config().get("auto_lora_enabled", True),
+                        )
+                        with gr.Row():
+                            save_btn = gr.Button(t("btn_save"), variant="primary")
+                            preview_btn = gr.Button(t("btn_preview"), variant="secondary")
+                        save_status = gr.Textbox(label=t("status"), interactive=False, max_lines=1)
 
-                with gr.Column(scale=1):
-                    gr.Markdown(t("h_preview"))
-                    preview_image = gr.Image(label=t("selected_image"), type="pil", interactive=False)
-                    preview_positive = gr.Textbox(label=t("positive_prompt"), interactive=False, lines=3)
-                    preview_negative = gr.Textbox(label=t("negative_prompt"), interactive=False, lines=2)
-                    # ----------------------------------------------------
-                    # --- 画像が見つからない場合などを翻訳メッセージにする ---
-                    # ----------------------------------------------------
-                    # --- 画像が見つからない場合などを翻訳メッセージにする ---
-                    preview_log = gr.Textbox(label=t("log"), interactive=False, lines=6)
+                    with gr.Column(scale=1):
+                        gr.Markdown(t("h_preview"))
+                        preview_image = gr.Image(label=t("selected_image"), type="pil", interactive=False)
+                        preview_positive = gr.Textbox(label=t("positive_prompt"), interactive=False, lines=3)
+                        preview_negative = gr.Textbox(label=t("negative_prompt"), interactive=False, lines=2)
+                        preview_log = gr.Textbox(label=t("log"), interactive=False, lines=6)
 
-        # ─── プロンプト自動生成 ───
-        with gr.Tab(t("tab_prompt_gen")):
-            gr.Markdown(t("prompt_gen_desc"))
+            # ─── プロンプト自動生成 ───
+            with gr.Tab(t("tab_prompt_gen")):
+                gr.Markdown(t("prompt_gen_desc"))
 
-            with gr.Row():
-                with gr.Column(scale=1):
-                    gen_image = gr.Image(
-                        label=t("target_image"),
-                        type="pil",
-                        interactive=True,
-                    )
-                    gen_section = gr.Textbox(
-                        label=t("section_name"),
-                        placeholder=t("section_ph"),
-                        info=t("section_info"),
-                    )
-                    # --- アコーディオン化されたタグカテゴリ ---
-                    _cat_base = ["cat_composition", "cat_pose", "cat_background", "cat_nature", "cat_lighting", "cat_atmosphere", "cat_meta"]
-                    _cat_char = ["cat_char_base", "cat_char_hair", "cat_char_face", "cat_char_clothes"]
-                    _cat_nsfw = ["cat_nsfw_action", "cat_nsfw_creature", "cat_nsfw_item", "cat_nsfw_focus", "cat_nsfw_fluids", "cat_nsfw_fetish", "cat_nsfw_clothes_mess", "cat_nsfw_censored"]
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        gen_image = gr.Image(
+                            label=t("target_image"),
+                            type="pil",
+                            interactive=True,
+                        )
+                        gen_section = gr.Textbox(
+                            label=t("section_name"),
+                            placeholder=t("section_ph"),
+                            info=t("section_info"),
+                        )
+                        # --- アコーディオン化されたタグカテゴリ ---
+                        _cat_base = ["cat_composition", "cat_pose", "cat_background", "cat_nature", "cat_lighting", "cat_atmosphere", "cat_meta"]
+                        _cat_char = ["cat_char_base", "cat_char_hair", "cat_char_face", "cat_char_clothes"]
+                        _cat_nsfw = ["cat_nsfw_action", "cat_nsfw_creature", "cat_nsfw_item", "cat_nsfw_focus", "cat_nsfw_fluids", "cat_nsfw_fetish", "cat_nsfw_clothes_mess", "cat_nsfw_censored"]
+                        
+                        gr.Markdown(t("h_categories"))
+                        with gr.Accordion(t("cat_base"), open=True):
+                            gen_cat_base = gr.CheckboxGroup(
+                                choices=[(t(c), c) for c in _cat_base],
+                                value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_base],
+                                show_label=False
+                            )
+                        with gr.Accordion(t("cat_char"), open=False):
+                            gen_cat_char = gr.CheckboxGroup(
+                                choices=[(t(c), c) for c in _cat_char],
+                                value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_char],
+                                show_label=False
+                            )
+                        with gr.Accordion(t("cat_nsfw"), open=False):
+                            gen_cat_nsfw = gr.CheckboxGroup(
+                                choices=[(t(c), c) for c in _cat_nsfw],
+                                value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_nsfw],
+                                show_label=False
+                            )
+                        gen_confidence = gr.Slider(
+                            label=t("confidence"),
+                            minimum=0.1, maximum=0.9, step=0.05,
+                            value=lambda: load_config().get("gen_confidence", 0.35),
+                            info=t("confidence_info"),
+                        )
+                        gen_positive = gr.Textbox(
+                            label=t("default_positive"),
+                            value=lambda: load_config().get("gen_positive", "(masterpiece:1.1), (best quality:1.0), "),
+                            lines=2,
+                            info=t("default_positive_info"),
+                        )
+                        gen_custom_dict = gr.Textbox(
+                            label=t("custom_dict"),
+                            value=lambda: load_config().get("gen_custom_dict", "night, city > cyberpunk cityscape, neon lights, highly detailed, vivid colors\n1girl, smile > beautiful detailed eyes, glowing smile"),
+                            lines=3,
+                            info=t("custom_dict_info"),
+                        )
+                        gen_negative = gr.Textbox(
+                            label=t("default_negative"),
+                            value=lambda: load_config().get("gen_negative", "lowres, blurry, artifact, bad anatomy, worst quality, low quality, jpeg artifacts"),
+                            lines=2,
+                            info=t("default_negative_info"),
+                        )
+                        with gr.Row():
+                            gen_btn = gr.Button(t("btn_gen_tags"), variant="primary")
+                            send_to_img2img_btn = gr.Button(t("btn_send_img2img"), variant="primary")
+                        with gr.Row():
+                            append_btn = gr.Button(t("btn_append_memo"), variant="secondary")
+                            gen_save_btn = gr.Button(t("btn_save_settings"), variant="secondary")
+
+                    try:
+                        from modules import generation_parameters_copypaste as params_copypaste
+                        params_copypaste.register_paste_params_button(
+                            params_copypaste.ParamBinding(
+                                paste_button=send_to_img2img_btn, tabname="img2img", source_image_component=gen_image
+                            )
+                        )
+                    except Exception as e:
+                        print(f"[Smart Img2Img Composer] Image copypaste binding disabled: {e}")
+
+                    with gr.Column(scale=1):
+                        gen_output = gr.Textbox(
+                            label=t("generated_entry"),
+                            interactive=True,
+                            lines=10,
+                            info=t("generated_entry_info"),
+                        )
+                        gen_log = gr.Textbox(
+                            label=t("analysis_log"),
+                            interactive=False,
+                            lines=8,
+                        )
+                        with gr.Row():
+                            append_status = gr.Textbox(
+                                label=t("append_status"),
+                                interactive=False,
+                                max_lines=1,
+                            )
+                            gen_save_status = gr.Textbox(
+                                label=t("status"),
+                                interactive=False,
+                                max_lines=1,
+                            )
+                        # 内部保持用の隠しコンポーネント
+                        hidden_gen_pos = gr.Textbox(visible=False)
+                        hidden_gen_neg = gr.Textbox(visible=False)
+                        hidden_gen_w = gr.Textbox(visible=False)
+                        hidden_gen_h = gr.Textbox(visible=False)
+
+            # ─── 🏷️ LoRAマネージャー ───
+            with gr.Tab(t("tab_lora_manager")):
+                def load_lora_list(mgr_type):
+                    filename = "lora_char.txt" if mgr_type == "char" else "lora_sit.txt"
+                    path = os.path.join(EXTENSION_DIR, filename)
+                    if os.path.exists(path):
+                        with open(path, "r", encoding="utf-8") as f:
+                            return f.read()
+                    return ""
+
+                def save_lora_list(mgr_type, content):
+                    filename = "lora_char.txt" if mgr_type == "char" else "lora_sit.txt"
+                    path = os.path.join(EXTENSION_DIR, filename)
+                    with open(path, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    return t("msg_lora_saved")
+
+                def append_lora_list(mgr_type, input_text):
+                    if not input_text or not input_text.strip():
+                        return load_lora_list(mgr_type), ""
                     
-                    gr.Markdown(t("h_categories"))
-                    with gr.Accordion(t("cat_base"), open=True):
-                        gen_cat_base = gr.CheckboxGroup(
-                            choices=[(t(c), c) for c in _cat_base],
-                            value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_base],
-                            show_label=False
-                        )
-                    with gr.Accordion(t("cat_char"), open=False):
-                        gen_cat_char = gr.CheckboxGroup(
-                            choices=[(t(c), c) for c in _cat_char],
-                            value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_char],
-                            show_label=False
-                        )
-                    with gr.Accordion(t("cat_nsfw"), open=False):
-                        gen_cat_nsfw = gr.CheckboxGroup(
-                            choices=[(t(c), c) for c in _cat_nsfw],
-                            value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_nsfw],
-                            show_label=False
-                        )
-                    # --------------------------------------
-                    gen_confidence = gr.Slider(
-                        label=t("confidence"),
-                        minimum=0.1, maximum=0.9, step=0.05,
-                        value=lambda: load_config().get("gen_confidence", 0.35),
-                        info=t("confidence_info"),
-                    )
-                    gen_positive = gr.Textbox(
-                        label=t("default_positive"),
-                        value=lambda: load_config().get("gen_positive", "(masterpiece:1.1), (best quality:1.0), "),
-                        lines=2,
-                        info=t("default_positive_info"),
-                    )
-                    gen_custom_dict = gr.Textbox(
-                        label=t("custom_dict"),
-                        value=lambda: load_config().get("gen_custom_dict", "night, city > cyberpunk cityscape, neon lights, highly detailed, vivid colors\n1girl, smile > beautiful detailed eyes, glowing smile"),
-                        lines=3,
-                        info=t("custom_dict_info"),
-                    )
-                    gen_negative = gr.Textbox(
-                        label=t("default_negative"),
-                        value=lambda: load_config().get("gen_negative", "lowres, blurry, artifact, bad anatomy, worst quality, low quality, jpeg artifacts"),
-                        lines=2,
-                        info=t("default_negative_info"),
-                    )
-                    with gr.Row():
-                        gen_btn = gr.Button(t("btn_gen_tags"), variant="primary")
-                        send_to_img2img_btn = gr.Button(t("btn_send_img2img"), variant="primary")
-                    with gr.Row():
-                        append_btn = gr.Button(t("btn_append_memo"), variant="secondary")
-                        gen_save_btn = gr.Button(t("btn_save_settings"), variant="secondary")
+                    filename = "lora_char.txt" if mgr_type == "char" else "lora_sit.txt"
+                    path = os.path.join(EXTENSION_DIR, filename)
+                    
+                    # 既存の内容を確認し、改行が必要か判断する
+                    current_content = ""
+                    if os.path.exists(path):
+                        with open(path, "r", encoding="utf-8") as f:
+                            current_content = f.read()
+                    
+                    new_line = input_text.strip()
+                    # 末尾が改行で終わっていない場合は改行を足す
+                    if current_content and not current_content.endswith("\n"):
+                        current_content += "\n"
+                    
+                    current_content += new_line + "\n"
+                    
+                    with open(path, "w", encoding="utf-8") as f:
+                        f.write(current_content)
+                    
+                    return current_content, "" # 最新リストを返し、入力欄を空にする
 
-                try:
-                    from modules import generation_parameters_copypaste as params_copypaste
-                    params_copypaste.register_paste_params_button(
-                        params_copypaste.ParamBinding(
-                            paste_button=send_to_img2img_btn, tabname="img2img", source_image_component=gen_image
-                        )
+                gr.Markdown(t("lora_manager_desc"))
+                
+                with gr.Row():
+                    lora_mgr_type = gr.Radio(
+                        label=t("lora_type"),
+                        choices=[(t("lora_type_char"), "char"), (t("lora_type_sit"), "sit")],
+                        value="char"
                     )
-                except Exception as e:
-                    print(f"[Smart Img2Img Composer] Image copypaste binding disabled: {e}")
-
-                with gr.Column(scale=1):
-                    gen_output = gr.Textbox(
-                        label=t("generated_entry"),
-                        interactive=True,
-                        lines=10,
-                        info=t("generated_entry_info"),
+                
+                with gr.Row():
+                    # １個ずつ追加するための入力エリア
+                    lora_mgr_input = gr.Textbox(
+                        label=t("lora_input_label"),
+                        placeholder="<lora:my_lora:0.8>, 1girl, ...",
+                        lines=2
                     )
-                    gen_log = gr.Textbox(
-                        label=t("analysis_log"),
-                        interactive=False,
-                        lines=8,
-                    )
-                    with gr.Row():
-                        append_status = gr.Textbox(
-                            label=t("append_status"),
-                            interactive=False,
-                            max_lines=1,
-                        )
-                        gen_save_status = gr.Textbox(
-                            label=t("status"),
-                            interactive=False,
-                            max_lines=1,
-                        )
-                    # 内部保持用の隠しコンポーネント
-                    hidden_gen_pos = gr.Textbox(visible=False)
-                    hidden_gen_neg = gr.Textbox(visible=False)
-                    hidden_gen_w = gr.Textbox(visible=False)
-                    hidden_gen_h = gr.Textbox(visible=False)
+                    append_lora_btn = gr.Button(t("btn_append_lora"), variant="primary")
 
+                lora_mgr_content = gr.Textbox(
+                    label=t("lora_list_label"),
+                    lines=15,
+                    placeholder="<lora:my_lora:0.8>, 1girl, ...",
+                    value=lambda: load_lora_list("char"),
+                    elem_id="smart_composer_lora_mgr_content"
+                )
+                
+                with gr.Row():
+                    save_lora_mgr_btn = gr.Button(t("btn_save_lora_list"), variant="primary")
+                    lora_mgr_msg = gr.Markdown("")
 
-            gen_btn.click(
-                fn=autogen_prompt,
-                inputs=[gen_image, gen_section, gen_confidence, gen_positive, gen_negative, gen_cat_base, gen_cat_char, gen_cat_nsfw, gen_custom_dict],
-                outputs=[gen_output, gen_log, hidden_gen_pos, hidden_gen_neg, hidden_gen_w, hidden_gen_h],
-            )
-            
-            send_to_img2img_btn.click(
-                fn=None,
-                _js="""
-                function(pos, neg, w, h) {
-                    var pos_elem = gradioApp().querySelector('#img2img_prompt textarea');
-                    if (pos_elem) {
-                        pos_elem.value = pos;
-                        updateInput(pos_elem);
-                    }
-                    var neg_elem = gradioApp().querySelector('#img2img_neg_prompt textarea');
-                    if (neg_elem) {
-                        neg_elem.value = neg;
-                        updateInput(neg_elem);
-                    }
-                    if (w && h) {
-                        var w_num = gradioApp().querySelector('#img2img_width input[type="number"]');
-                        var w_range = gradioApp().querySelector('#img2img_width input[type="range"]');
-                        if (w_num) { w_num.value = w; updateInput(w_num); }
-                        if (w_range) { w_range.value = w; updateInput(w_range); }
-                        var h_num = gradioApp().querySelector('#img2img_height input[type="number"]');
-                        var h_range = gradioApp().querySelector('#img2img_height input[type="range"]');
-                        if (h_num) { h_num.value = h; updateInput(h_num); }
-                        if (h_range) { h_range.value = h; updateInput(h_range); }
-                    }
-                    var tabs = gradioApp().querySelectorAll('#tabs > div > button');
-                    if (tabs && tabs.length > 0) {
-                        for(var i=0; i<tabs.length; i++){
-                            if(tabs[i].innerText.includes('img2img')) {
-                                tabs[i].click();
-                                break;
-                            }
-                        }
-                    }
-                    return [];
-                }
-                """,
-                inputs=[hidden_gen_pos, hidden_gen_neg, hidden_gen_w, hidden_gen_h],
-                outputs=None,
-            )
+                # イベント
+                lora_mgr_type.change(fn=load_lora_list, inputs=[lora_mgr_type], outputs=[lora_mgr_content])
+                save_lora_mgr_btn.click(fn=save_lora_list, inputs=[lora_mgr_type, lora_mgr_content], outputs=[lora_mgr_msg])
+                append_lora_btn.click(fn=append_lora_list, inputs=[lora_mgr_type, lora_mgr_input], outputs=[lora_mgr_content, lora_mgr_input])
+
+            # ─── 使い方 ───
+            with gr.Tab(t("tab_usage")):
+                gr.Markdown(t("usage_md"))
 
         # ─── イベントハンドラ (すべてのコンポーネント定義後に記述) ───
         save_btn.click(
@@ -1730,12 +1803,52 @@ def on_ui_tabs():
             inputs=[gen_output],
             outputs=[append_status],
         )
+        gen_btn.click(
+            fn=autogen_prompt,
+            inputs=[gen_image, gen_section, gen_confidence, gen_positive, gen_negative, gen_cat_base, gen_cat_char, gen_cat_nsfw, gen_custom_dict],
+            outputs=[gen_output, gen_log, hidden_gen_pos, hidden_gen_neg, hidden_gen_w, hidden_gen_h],
+        )
+        
+        send_to_img2img_btn.click(
+            fn=None,
+            _js="""
+            function(pos, neg, w, h) {
+                var pos_elem = gradioApp().querySelector('#img2img_prompt textarea');
+                if (pos_elem) {
+                    pos_elem.value = pos;
+                    updateInput(pos_elem);
+                }
+                var neg_elem = gradioApp().querySelector('#img2img_neg_prompt textarea');
+                if (neg_elem) {
+                    neg_elem.value = neg;
+                    updateInput(neg_elem);
+                }
+                if (w && h) {
+                    var w_num = gradioApp().querySelector('#img2img_width input[type="number"]');
+                    var w_range = gradioApp().querySelector('#img2img_width input[type="range"]');
+                    if (w_num) { w_num.value = w; updateInput(w_num); }
+                    if (w_range) { w_range.value = w; updateInput(w_range); }
+                    var h_num = gradioApp().querySelector('#img2img_height input[type="number"]');
+                    var h_range = gradioApp().querySelector('#img2img_height input[type="range"]');
+                    if (h_num) { h_num.value = h; updateInput(h_num); }
+                    if (h_range) { h_range.value = h; updateInput(h_range); }
+                }
+                var tabs = gradioApp().querySelectorAll('#tabs > div > button');
+                if (tabs && tabs.length > 0) {
+                    for(var i=0; i<tabs.length; i++){
+                        if(tabs[i].innerText.includes('img2img')) {
+                            tabs[i].click();
+                            break;
+                        }
+                    }
+                }
+                return [];
+            }
+            """,
+            inputs=[hidden_gen_pos, hidden_gen_neg, hidden_gen_w, hidden_gen_h],
+            outputs=None,
+        )
 
-        # ─── 使い方 ───
-        with gr.Tab(t("tab_usage")):
-            gr.Markdown(t("usage_md"))
-
-    return [(tab, "Random Composer", "random_composer_tab")]
-
+    return [(tab, "Smart Img2Img Composer", "smart_composer_tabs_root")]
 
 script_callbacks.on_ui_tabs(on_ui_tabs)

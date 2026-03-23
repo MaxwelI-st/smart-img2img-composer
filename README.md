@@ -27,6 +27,7 @@ Smart Img2Img Composer eliminates the hassle of manually changing prompts and ba
 - **Injection Stability (v2.1.2)**: Reliable prompt injection that works with batch generation and various WebUI versions.
 - **Smart Matching**: Selects the single best-matching prompt based on filename similarity score.
 - **Tag Deduplication**: Automatically cleans up redundant tags in the final prompt.
+- **Integrated LoRA Manager (NEW v2.2.0)**: Manage Character and Situation LoRA lists in a dedicated tab. Randomly inject them during img2img generation.
 - **Consolidated Settings**: All configurations are persisted to `config.json` and persist across browser reloads.
 - **Custom Dictionary**: Map specific tags or WD14 results to your own custom phrases.
 
@@ -36,6 +37,11 @@ Smart Img2Img Composer eliminates the hassle of manually changing prompts and ba
 Configure your image folder, memo file, matching threshold, and preview results at a glance.
 
 ![Settings & Preview](docs/images/ui_settings_en.png)
+
+### 🏷️ LoRA Manager (NEW)
+Register and edit your Character or Situation LoRA lists. These saved lists are randomly sampled and applied during the img2img process.
+
+![LoRA Manager](docs/images/ui_lora_manager_en.png)
 
 ### 🏷️ Prompt Auto-Generation (WD14 Tagger)
 Upload an image to auto-extract tags with smart category filtering — composition, pose, lighting, NSFW, and more.
@@ -68,6 +74,17 @@ You can also toggle auto-resizing and configure the base resolution via a slider
 1. Go to the **img2img** tab.
 2. Expand the "**🎲 Smart Composer**" accordion at the bottom and check "**Enable**".
 3. Press the Generate button. The extension will randomly swap the source image and automatically inject the paired prompts.
+
+### 3. Register LoRAs in LoRA Manager
+1. Go to the "**🏷️ LoRA Manager**" tab.
+2. Select "Character" or "Situation" and enter your LoRA triggers (e.g., `<lora:my_character:0.8>, 1girl, ...`), one per line. Click **Save**.
+3. In the img2img tab's Smart Img2Img Composer accordion, check "**🎲 Random Character LoRA**" etc. A random LoRA from your list will be injected on each generation.
+
+### 4. Direct file editing (Advanced)
+You can directly edit and save the following files in the extension folder:
+- Character list: `lora_char.txt`
+- Situation list: `lora_sit.txt`
+- Lines starting with `#` are ignored as comments.
 
 ---
 
