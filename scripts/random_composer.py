@@ -930,15 +930,16 @@ class RandomComposerScript(scripts.Script):
                 value=False,
                 elem_id="smart_composer_auto_resize",
             )
-            base_resolution = gr.Radio(
-                label="ベース解像度",
-                choices=["1024 (SDXL / Illustrious)", "768", "512 (SD1.5)"],
-                value="1024 (SDXL / Illustrious)",
+            base_resolution = gr.Slider(
+                label="📏 ベース解像度（長辺をこの値に合わせる）",
+                minimum=512, maximum=2048, step=64,
+                value=1024,
                 elem_id="smart_composer_base_resolution",
+                info="SDXL / Illustrious: 1024〜1536 推奨 ／ SD1.5: 512 推奨",
             )
         return [enabled, override_prompt, auto_resize, base_resolution]
 
-    def before_process(self, p: processing.StableDiffusionProcessing, enabled, override_prompt, auto_resize=False, base_resolution="1024 (SDXL / Illustrious)"):
+    def before_process(self, p: processing.StableDiffusionProcessing, enabled, override_prompt, auto_resize=False, base_resolution=1024):
         """before_process のみでプロンプト注入を行う（二重実行防止）"""
         if not enabled:
             return
@@ -961,7 +962,7 @@ class RandomComposerScript(scripts.Script):
                 # 画像サイズ自動調整が有効な場合のみ解像度を変更
                 if auto_resize:
                     # ベース解像度の数値を抽出
-                    base_size = int(base_resolution.split()[0]) if base_resolution else 1024
+                    base_size = int(base_resolution) if base_resolution else 1024
                     new_w, new_h = get_stable_dimensions(img, base_size)
                     p.width = new_w
                     p.height = new_h
