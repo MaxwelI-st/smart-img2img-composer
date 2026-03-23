@@ -170,27 +170,32 @@ def get_image_files(folder: str) -> list:
 
 def match_image_to_sections(image_path: str, sections: dict, threshold: float) -> list:
     basename = os.path.splitext(os.path.basename(image_path))[0].lower()
-    matched = []
+    exact_match = []
+    partial_match = []
 
     for section_name, data in sections.items():
-        hit = False
+        # 完全一致（最優先）
         if basename == section_name:
-            hit = True
-        elif section_name in basename:
-            hit = True
-        elif basename in section_name:
-            hit = True
-        elif threshold < 1.0:
+            exact_match.append(data)
+            continue
+        # 部分一致：短い側が3文字以上かつ長い側の50%以上の長さである場合のみ
+        if section_name in basename or basename in section_name:
+            shorter = min(len(basename), len(section_name))
+            longer = max(len(basename), len(section_name))
+            if shorter >= 3 and longer > 0 and (shorter / longer) >= 0.5:
+                partial_match.append(data)
+                continue
+        # 類似度マッチ（閾値以下の場合のみ試行）
+        if threshold < 1.0:
             shorter = min(len(basename), len(section_name))
             longer = max(len(basename), len(section_name))
             if longer > 0:
                 common = sum(1 for a, b in zip(basename, section_name) if a == b)
                 if common > 0 and (common / longer) >= threshold:
-                    hit = True
-        if hit:
-            matched.append(data)
+                    partial_match.append(data)
 
-    return matched
+    # 完全一致があれば完全一致のみ返す（混合しない）
+    return exact_match if exact_match else partial_match
 
 
 def check_lora_exists(lora_str: str) -> bool:
