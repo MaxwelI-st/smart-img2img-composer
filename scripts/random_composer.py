@@ -1,17 +1,44 @@
 # -*- coding: utf-8 -*-
 """
 Random Img2Img Composer
-AUTOMATIC1111 Stable Diffusion WebUI 拡張機能 v1.0 (Stable)
+AUTOMATIC1111 Stable Diffusion WebUI 拡張機能 v1.0.2
 
 img2img生成時に、指定フォルダからランダム画像を選択し、
 メモファイルから対応プロンプト（positive/negative）を自動取得して投入する。
 WD14 Tagger連携でプロンプトの自動生成も可能。
 
-【v1.0 修正内容】
-- Release: 正式版 v1.0 リリース
+【v1.0 Stable 修正内容】
+- Release: 正式版 v1.0 Stable リリース
 - UI/UX: 全カテゴリの「一括選択/解除」ボタンを実装
 - UI/UX: 有用性の高い「基本」カテゴリのみアコーディオンをデフォルト開に設定
-- Logic: v2.4.3 までの全修正と安定化ロジックを統合
+- Logic: v2.4.x までの全修正と安定化ロジックを統合 (Official v1.0)
+
+【v1.0.1 バグ修正】
+- Bug Fix 1: lora_mgr_type.change の inputs/JS引数数ミスマッチ修正
+  → 未保存警告ダイアログが常に動作しなかった問題を解消
+- Bug Fix 2: gen_btn_toggle_all_cats.click の戻り値タプル不統一修正
+  → 全解除時に Gradio クラッシュしていた問題を解消
+- Bug Fix 3: save_btn の check_individual_health インデックスを専用関数化
+  → 引数追加時の脆弱なハードコードを排除
+- Bug Fix 4+6: gen_*_toggle で gr.update(value=...) を使用
+  → Gradio 3 で [] を返すと変更なしと解釈される問題を解消
+- Bug Fix 5: _filter_tags で重複タグの先勝ちロジックを明確化
+  → 複数カテゴリ重複タグが後勝ち上書きされていた不整合を解消
+
+【v1.0.2 修正内容】
+- Fix A: gen_categories 空保存時のデフォルト崩壊を修正
+  → DEFAULT_CONFIG に "gen_categories": None を追加
+  → load_config() で [] を None に正規化するガードを追加
+  → save_all_settings() で空リストを None に変換してから保存
+- Fix B: cat_char_eyes が既に実装済みであることを確認（作業なし）
+- Fix C: lora_char.txt / lora_sit.txt 自動テンプレート生成を追加
+  → _ensure_lora_files() 関数を追加、on_ui_tabs() 先頭で呼び出し
+  → 初回起動時からLoRAマネージャーが正常動作するよう対処
+- Fix D: requirements.txt を新規作成・同梱
+- Fix E: _get_easy_prompt_tags() のパス検索を多パターン化
+  → sdweb-easy-prompt-selector / easy-prompt-selector /
+     a1111-sd-webui-tagcomplete / sd-webui-tagcomplete の4パターンに対応
+  → yaml=None 時の early return を明示化
 """
 
 import os
@@ -69,9 +96,51 @@ DEFAULT_CONFIG = {
     "lora_offset": 0.0,
     "output_sort_mode": "None",
     "presets": {},
+    # gen_categories が None の場合は起動時にデフォルト全選択として扱う
+    # （空リスト [] は「意図的に全解除」と区別できないため None を正規値とする）
+    "gen_categories": None,
 }
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff"}
+
+# Fix C: lora_char.txt / lora_sit.txt のデフォルトテンプレート内容
+# ファイルが存在しない場合に自動生成し、初回起動からLoRAマネージャーが正常動作する
+_LORA_CHAR_TEMPLATE = """\
+# LoRA キャラクターリスト（1行1エントリ）
+# 書式: <lora:LoRA名:強度>  または  任意のプロンプト文字列
+# 例:
+# <lora:my_character_v2:0.8>, 1girl, blue hair
+# <lora:another_char:0.7>, 1boy, white hair
+"""
+
+_LORA_SIT_TEMPLATE = """\
+# LoRA シチュエーションリスト（1行1エントリ）
+# 書式: <lora:LoRA名:強度>  または  任意のプロンプト文字列
+# 例:
+# <lora:outdoor_scene:0.6>, park, sunlight
+# <lora:indoor_cozy:0.7>, living room, warm lighting
+"""
+
+
+def _ensure_lora_files() -> None:
+    """
+    Fix C: lora_char.txt / lora_sit.txt が存在しない場合にテンプレートを自動生成する。
+    初回起動時の「ファイルが見つかりません」状態を解消し、
+    LoRAマネージャーがすぐに使用可能な状態にする。
+    """
+    for path, template in (
+        (LORA_CHAR_PATH, _LORA_CHAR_TEMPLATE),
+        (LORA_SIT_PATH, _LORA_SIT_TEMPLATE),
+    ):
+        if not os.path.exists(path):
+            try:
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(template)
+                print(f"[Smart Img2Img Composer] Created template: {path}")
+            except IOError as e:
+                print(f"[Smart Img2Img Composer] Could not create template {path}: {e}")
+
 
 # ======================================================================
 # i18n 翻訳辞書
@@ -618,6 +687,11 @@ def load_config() -> dict:
                 for k in ["image_folder", "memo_file", "wildcard_1_path", "wildcard_2_path", "wildcard_3_path"]:
                     if k in config and isinstance(config[k], str):
                         config[k] = _clean_path(config[k])
+                # Fix A: gen_categories が空リストの場合は None に正規化する。
+                # config.json に [] が保存されると UI の `or` フォールバックが機能しなくなるため、
+                # 「未設定（全選択）」を表す値として None を正規値に統一する。
+                if config.get("gen_categories") == []:
+                    config["gen_categories"] = None
                 return config
         except (json.JSONDecodeError, IOError):
             pass
@@ -1061,6 +1135,8 @@ def save_all_settings(language, image_folder, memo_file, match_threshold, genera
                       gen_mosaic_auto=False, gen_mosaic_level="Mosaic Med", gen_custom_dict_enabled=True):
     config = load_config()
     categories = cat_base + cat_char + cat_nsfw
+    # Fix A: 全解除（空リスト）の場合は None を保存し、
+    # 次回ロード時に or フォールバックが正しく機能するようにする
     config.update({
         "language": language,
         "image_folder": _clean_path(image_folder),
@@ -1073,7 +1149,7 @@ def save_all_settings(language, image_folder, memo_file, match_threshold, genera
         "gen_positive": gen_positive,
         "gen_negative": gen_negative,
         "gen_custom_dict": gen_custom,
-        "gen_categories": categories,
+        "gen_categories": categories if categories else None,
         "wildcard_1_path": _clean_path(w1_path),
         "wildcard_2_path": _clean_path(w2_path),
         "wildcard_3_path": _clean_path(w3_path),
@@ -1393,37 +1469,84 @@ _DEFAULT_CHAR_CATS = _CAT_CHAR_KEYS[:]  # デフォルト選択状態（Characte
 
 
 def _get_easy_prompt_tags():
-    """sdweb-easy-prompt-selector のタグフォルダから全タグを取得する"""
+    """
+    sdweb-easy-prompt-selector（およびその派生・類似拡張）の
+    タグフォルダから全タグを取得する。
+
+    Fix E:
+    - yaml が None（PyYAML 未インストール）の場合は early return で即座に空集合を返す
+    - インストール名が異なるケースに対応するため、複数の候補ディレクトリを検索する
+      対応パターン:
+        1. sdweb-easy-prompt-selector   (本家)
+        2. easy-prompt-selector         (短縮名インストール)
+        3. a1111-sd-webui-tagcomplete   (tagcomplete の tags フォルダも活用)
+        4. sd-webui-tagcomplete         (別名パターン)
+    - 候補が1つでも見つかればそこでタグ収集を開始し、見つからなければ空集合を返す
+    """
+    # Fix E: yaml=None の場合は YAML 解析不能なので即 early return
+    if yaml is None:
+        return set()
+
     tags = set()
-    # デフォルトのインストールパスを想定
-    easy_prompt_dir = os.path.join(os.path.dirname(EXTENSION_DIR), "sdweb-easy-prompt-selector", "tags")
-    
-    if not os.path.exists(easy_prompt_dir) or yaml is None:
+    extensions_root = os.path.dirname(EXTENSION_DIR)
+
+    # Fix E: 検索候補ディレクトリ（優先順位順）
+    # 各エントリは (拡張フォルダ名のパターン, タグサブディレクトリ名) のタプル
+    _EASY_PROMPT_CANDIDATES = [
+        ("sdweb-easy-prompt-selector", "tags"),
+        ("easy-prompt-selector",       "tags"),
+        ("a1111-sd-webui-tagcomplete", "tags"),
+        ("sd-webui-tagcomplete",       "tags"),
+    ]
+
+    found_dirs = []
+    try:
+        installed = os.listdir(extensions_root) if os.path.isdir(extensions_root) else []
+    except OSError:
+        installed = []
+
+    for ext_name, sub in _EASY_PROMPT_CANDIDATES:
+        # 完全一致
+        candidate = os.path.join(extensions_root, ext_name, sub)
+        if os.path.isdir(candidate):
+            found_dirs.append(candidate)
+            continue
+        # 前方一致（バージョンサフィックス等に対応）
+        for installed_name in installed:
+            if installed_name.startswith(ext_name):
+                candidate2 = os.path.join(extensions_root, installed_name, sub)
+                if os.path.isdir(candidate2) and candidate2 not in found_dirs:
+                    found_dirs.append(candidate2)
+
+    if not found_dirs:
         return tags
 
-    try:
-        for root, _, files in os.walk(easy_prompt_dir):
-            for file in files:
-                if file.endswith((".yml", ".yaml")):
+    def _extract_values(d):
+        """YAML dict から再帰的にタグ文字列を収集する"""
+        for v in d.values():
+            if isinstance(v, list):
+                for item in v:
+                    if isinstance(item, str) and not item.startswith(("<lora:", "__")):
+                        tags.add(item.strip().lower().replace(" ", "_"))
+            elif isinstance(v, dict):
+                _extract_values(v)
+
+    for tags_dir in found_dirs:
+        try:
+            for root, _, files in os.walk(tags_dir):
+                for file in files:
+                    if not file.endswith((".yml", ".yaml")):
+                        continue
                     try:
                         with open(os.path.join(root, file), "r", encoding="utf-8") as f:
                             data = yaml.safe_load(f)
-                            if isinstance(data, dict):
-                                def extract_values(d):
-                                    for v in d.values():
-                                        if isinstance(v, list):
-                                            for item in v:
-                                                if isinstance(item, str):
-                                                    # LoRAやWildcardは除外
-                                                    if not item.startswith(("<lora:", "__")):
-                                                        tags.add(item.strip().lower().replace(" ", "_"))
-                                        elif isinstance(v, dict):
-                                            extract_values(v)
-                                extract_values(data)
+                        if isinstance(data, dict):
+                            _extract_values(data)
                     except Exception:
                         continue
-    except Exception as e:
-        print(f"[Smart Img2Img Composer] EasyPrompt load error: {e}")
+        except Exception as e:
+            print(f"[Smart Img2Img Composer] EasyPrompt load error ({tags_dir}): {e}")
+
     return tags
 
 
@@ -1511,11 +1634,14 @@ def _filter_tags(tags: dict, confidence_threshold: float = 0.35, selected_catego
         # else: 以前は other_matches に入れていたが、フィルタ外タグは除外すべき
 
     # カテゴリごとに上限を適用して統合
-    for cat, matches in cat_matches.items():
+    # Bug Fix 5: 複数カテゴリに同タグが存在する場合は先に処理したカテゴリが優先（先勝ち）
+    for cat in selected_categories:
+        matches = cat_matches.get(cat, [])
         limit = CAT_LIMITS.get(cat, 999)
         sorted_matches = sorted(matches, key=lambda x: x[1], reverse=True)
         for t_clean, s in sorted_matches[:limit]:
-            filtered[t_clean] = s
+            if t_clean not in filtered:  # Bug Fix 5: 後勝ち上書きを防止
+                filtered[t_clean] = s
 
     # EasyPromptで保護されたタグを最後に統合（上限適用外）
     filtered.update(easy_protected)
@@ -1820,7 +1946,7 @@ class RandomComposerScript(scripts.Script):
     sorting_priority = -100
 
     def title(self):
-        return "Smart Img2Img Composer v1.0 (Stable)"
+        return "Smart Img2Img Composer v1.0.1"
 
     def show(self, is_img2img):
         return scripts.AlwaysVisible if is_img2img else False
@@ -2045,11 +2171,13 @@ class RandomComposerScript(scripts.Script):
 # ======================================================================
 
 def on_ui_tabs():
+    # Fix C: lora_char.txt / lora_sit.txt が存在しない場合にテンプレートを自動生成
+    _ensure_lora_files()
     config = load_config()
 
     with gr.Blocks(analytics_enabled=False) as tab:
         gr.Markdown(
-            "# 🎲 Smart Img2Img Composer v1.0 (Stable)\n"
+            "# 🎲 Smart Img2Img Composer v1.0.2\n"
             + t("tab_header")
         )
 
@@ -2413,10 +2541,12 @@ def on_ui_tabs():
                                 break
                     return ""
 
-                def load_lora_with_baseline(mgr_label):
-                    content = load_lora_list(mgr_label)
+                def load_lora_with_baseline(mgr_label, _content=None, _baseline=None):
+                    # Bug Fix 1: JSからcontent/baselineも渡されるよう3引数に拡張
+                    # mgr_label が None (JSキャンセル) の場合は更新しない
                     if mgr_label is None:
                         return gr.update(), gr.update()
+                    content = load_lora_list(mgr_label)
                     return content, content
 
                 def save_lora_list(mgr_label, content):
@@ -2518,7 +2648,7 @@ def on_ui_tabs():
                 # _js で content/baseline を受け取る確認ダイアログは JS 側でのみ処理する
                 lora_mgr_type.change(
                     fn=load_lora_with_baseline,
-                    inputs=[lora_mgr_type],
+                    inputs=[lora_mgr_type, lora_mgr_content, lora_mgr_baseline],
                     outputs=[lora_mgr_content, lora_mgr_baseline],
                     _js="(type, content, baseline) => smart_composer_lora_change(type, content, baseline)"
                 )
@@ -2570,8 +2700,14 @@ def on_ui_tabs():
         ]
 
 
+        def _do_save(*args):
+            # Bug Fix 3: インデックスハードコードを廃止。_common_save_inputs の構成に合わせて
+            # image_folder=1, memo_file=2, w1=14, w2=15, w3=16 を名前で特定
+            msg = save_all_settings(*args)
+            h = check_individual_health(args[1], args[2], args[14], args[15], args[16])
+            return (msg,) + h
         save_btn.click(
-            fn=lambda *args: (save_all_settings(*args), *check_individual_health(*[args[i] for i in [1, 2, 14, 15, 16]])),
+            fn=_do_save,
             inputs=_common_save_inputs,
             outputs=[save_status] + _health_inputs,
         )
@@ -2587,7 +2723,7 @@ def on_ui_tabs():
             outputs=[preview_image, preview_positive, preview_negative, preview_log],
         )
         gen_save_btn.click(
-            fn=lambda *args: (save_all_settings(*args), *check_individual_health(*[args[i] for i in [1, 2, 14, 15, 16]])),
+            fn=_do_save,
             inputs=_common_save_inputs,
             outputs=[gen_save_status] + _health_inputs,
         )
@@ -2608,25 +2744,28 @@ def on_ui_tabs():
 
         # ─── トグル/一括操作ロジック ───
         # 全カテゴリ一括選択/解除: いずれかが選択済みなら全解除、全未選択なら全選択
+        def _toggle_all_cats(cb, cc, cn):
+            # Bug Fix 2: 全解除時も必ず3要素タプルを返す（outputs=3個に対応）
+            if cb or cc or cn:
+                return [], [], []
+            return list(_CAT_BASE_KEYS), list(_CAT_CHAR_KEYS), list(_CAT_NSFW_KEYS)
         gen_btn_toggle_all_cats.click(
-            fn=lambda cb, cc, cn: (
-                [] if (cb or cc or cn) else (_cat_base, _cat_char, _cat_nsfw)
-            ),
+            fn=_toggle_all_cats,
             inputs=[gen_cat_base, gen_cat_char, gen_cat_nsfw],
             outputs=[gen_cat_base, gen_cat_char, gen_cat_nsfw]
         )
         gen_base_toggle.click(
-            fn=lambda x: _cat_base if not x else [],
+            fn=lambda x: gr.update(value=list(_CAT_BASE_KEYS)) if not x else gr.update(value=[]),
             inputs=[gen_cat_base],
             outputs=gen_cat_base
         )
         gen_char_toggle.click(
-            fn=lambda x: _cat_char if not x else [],
+            fn=lambda x: gr.update(value=list(_CAT_CHAR_KEYS)) if not x else gr.update(value=[]),
             inputs=[gen_cat_char],
             outputs=gen_cat_char
         )
         gen_nsfw_toggle.click(
-            fn=lambda x: _cat_nsfw if not x else [],
+            fn=lambda x: gr.update(value=list(_CAT_NSFW_KEYS)) if not x else gr.update(value=[]),
             inputs=[gen_cat_nsfw],
             outputs=gen_cat_nsfw
         )
