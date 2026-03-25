@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """
 Random Img2Img Composer
-AUTOMATIC1111 Stable Diffusion WebUI 拡張機能 v2.4.2 (Stable)
+AUTOMATIC1111 Stable Diffusion WebUI 拡張機能 v1.0 (Stable)
 
 img2img生成時に、指定フォルダからランダム画像を選択し、
 メモファイルから対応プロンプト（positive/negative）を自動取得して投入する。
 WD14 Tagger連携でプロンプトの自動生成も可能。
 
-【v2.4.2 修正内容】
-- UI/UX: ヘルスチェック警告を各パス入力欄のラベル表示に移動（威圧的な赤バーを削除）
-- UI/UX: 「使い方」タブのマニュアルを最新機能に合わせて全面刷新
-- Logic: パスが空欄の場合は「未設定」として扱い、警告を表示しないように調整
-- Cleanup: v2.4.1で行ったLoRAマネージャー未保存警告、デッドコード削除などを統合
+【v1.0 修正内容】
+- Release: 正式版 v1.0 リリース
+- UI/UX: 全カテゴリの「一括選択/解除」ボタンを実装
+- UI/UX: 有用性の高い「基本」カテゴリのみアコーディオンをデフォルト開に設定
+- Logic: v2.4.3 までの全修正と安定化ロジックを統合
 """
 
 import os
@@ -254,6 +254,33 @@ _I18N = {
         "en": "### 🏷️ Auto generate prompts with WD14 Tagger\nUpload image → Extract scene/pose/composition tags ONLY → Append to memo file\n\n**(Character traits and clothes are automatically EXCLUDED)**",
         "ja": "### 🏷️ WD14 Tagger で自動プロンプト生成\n画像をアップロード → シーン/ポーズ/構図のタグだけ抽出 → メモファイルに追記\n\n**服装・人物特徴は自動除外されます。**",
     },
+    # Refactor #1: 二重定義を解消 - このキーは旧来の短いラベル（未使用）だったため削除
+    # UI 側では h_categories（2つ目の定義 = ### 付きフル版）を使用する
+    "h_mosaic_settings": {
+        "en": "🧱 Mosaic Auto-Prompt Settings",
+        "ja": "🧱 モザイクプロンプト自動付与設定",
+    },
+    "btn_deselect_all": {
+        "en": "❌ Deselect All Categories",
+        "ja": "❌ 全カテゴリ選択解除",
+    },
+    "btn_toggle_all": {
+        "en": "🔄 Select/Deselect All",
+        "ja": "🔄 全選択/解除",
+    },
+    # UI Fix #1: btn_toggle_all_cats が _I18N に未定義だったためキー名がそのまま表示されていた
+    "btn_toggle_all_cats": {
+        "en": "🔄 Toggle All Categories",
+        "ja": "🔄 全カテゴリ 選択/解除",
+    },
+    "h_extracted_tags": {
+        "en": "🏷️ Extracted Tags Only Display",
+        "ja": "🏷️ 抽出されたタグのみ表示",
+    },
+    "gen_custom_dict_enabled": {
+        "en": "Enable Custom Prompt Rules",
+        "ja": "条件付与ルールを有効にする",
+    },
     "target_image": {
         "en": "📸 Target Image",
         "ja": "📸 解析する画像",
@@ -283,8 +310,8 @@ _I18N = {
         "ja": "👩 人物・詳細カテゴリ (髪型・服装など)",
     },
     "cat_nsfw": {
-        "en": "🔞 NSFW & Fetish (Actions, Fluids)",
-        "ja": "🔞 特殊・NSFWカテゴリ (行為・アイテム等)",
+        "en": "🔞 NSFW & Fetish (Actions, Genitals, Items)",
+        "ja": "🔞 特殊・NSFWカテゴリ (行為・局部・アイテム等)",
     },
     "confidence": {
         "en": "🎯 Tag Confidence Threshold",
@@ -310,6 +337,17 @@ _I18N = {
         "en": "Format: `condition tag > prompt to add` (Added only if condition matched in image)",
         "ja": "「条件タグ > 追加したいプロンプト」の形式で記述 (複数行可)。画像から条件タグが出た時のみ追加されます。",
     },
+    "gen_mosaic_auto": {
+        "en": "🧱 Mosaic Auto-Prompt",
+        "ja": "🧱 モザイク用プロンプトを自動付与",
+    },
+    "gen_mosaic_level": {
+        "en": "🧱 Mosaic Level",
+        "ja": "🧱 モザイクの強度",
+    },
+    "mosaic_low": {"en": "Low", "ja": "薄い"},
+    "mosaic_med": {"en": "Med", "ja": "普通"},
+    "mosaic_high": {"en": "High", "ja": "厚い"},
     # --- タグカテゴリ名 ---
     "cat_composition": {"en": "Composition & Camera", "ja": "構図・カメラ"},
     "cat_pose": {"en": "Pose & Action", "ja": "ポーズ・アクション"},
@@ -318,10 +356,12 @@ _I18N = {
     "cat_lighting": {"en": "Lighting", "ja": "照明"},
     "cat_atmosphere": {"en": "Atmosphere", "ja": "雰囲気"},
     "cat_meta": {"en": "Meta Tags", "ja": "メタタグ"},
-    "cat_char_base": {"en": "Character Base", "ja": "人物・基本属性"},
-    "cat_char_hair": {"en": "Hair & Face Area", "ja": "髪型・顔周り"},
-    "cat_char_face": {"en": "Expression & Mouth", "ja": "表情・口"},
-    "cat_char_clothes": {"en": "Clothes & Accessories", "ja": "服装・靴・装飾品"},
+    "cat_char_base": {"en": "👤 Character Body & Traits", "ja": "👤 身体・基本特徴"},
+    "cat_char_hair": {"en": "💇 Hair Style & Color", "ja": "💇 髪型・髪色"},
+    "cat_char_eyes": {"en": "👀 Eyes & Makeup", "ja": "👀 目・メイク"},
+    "cat_char_face": {"en": "🎈 Expression", "ja": "🎈 表情"},
+    "cat_char_clothes": {"en": "👗 Clothes & Accessories", "ja": "👗 服装・装飾品"},
+    "cat_char_male": {"en": "♂️ Male Character", "ja": "♂️ 男性キャラクター"},
     "cat_nsfw_action": {"en": "🎭 Actions", "ja": "🎭 行為・アクション"},
     "cat_nsfw_creature": {"en": "🦑 Creatures", "ja": "🦑 クリーチャー・追加キャラ"},
     "cat_nsfw_item": {"en": "🧸 Toys & Items", "ja": "🧸 アイテム・玩具"},
@@ -329,7 +369,8 @@ _I18N = {
     "cat_nsfw_fluids": {"en": "💦 Fluids & Mess", "ja": "💦 体液・汚れ系"},
     "cat_nsfw_fetish": {"en": "🥵 Fetish States", "ja": "🥵 表情・フェティッシュ状態"},
     "cat_nsfw_clothes_mess": {"en": "👗 Clothes Mess", "ja": "👗 衣服の乱れ・着脱"},
-    "cat_nsfw_censored": {"en": "🍆 Censor & Genitals", "ja": "🍆 局所・モザイク"},
+    "cat_nsfw_genitals": {"en": "🍑 Genitals", "ja": "🍑 局部・デリケートゾーン"},
+    "cat_nsfw_mosaic": {"en": "🧱 Mosaic & Censor", "ja": "🧱 モザイク・修正"},
     # --- 関数戻り値メッセージ ---
     "msg_settings_saved": {"en": "✅ Settings saved", "ja": "✅ 設定を保存しました"},
     "msg_settings_err": {"en": "❌ Failed to save settings:", "ja": "❌ 設定の保存に失敗しました:"},
@@ -456,7 +497,7 @@ _I18N = {
     "tab_usage": {"en": "📖 Usage", "ja": "📖 使い方"},
     "usage_md": {
         "en": (
-            "## 📖 User Manual (v2.4.2)\n\n"
+            "## 📖 User Manual (v1.0 Stable)\n\n"
             "### 1. Basic Flow\n"
             "1. Set your **📁 Image Folder** and **📄 Memo File** paths in the Settings tab.\n"
             "2. In the **img2img** tab, open **🎲 Smart Composer** and check **Enable**.\n"
@@ -484,7 +525,7 @@ _I18N = {
             "- **Dynamic Prompts**: Supports `__wildcards__` and `{A|B}` syntax within the memo file."
         ),
         "ja": (
-            "## 📖 ユーザーマニュアル (v2.4.2)\n\n"
+            "## 📖 ユーザーマニュアル (v1.0 Stable)\n\n"
             "### 1. 基本的な使い方\n"
             "1. **⚙️ 設定** タブで **📁 画像フォルダ** と **📄 メモファイル** のパスを指定します。\n"
             "2. **img2img** タブ内の **🎲 Smart Composer** アコーディオンを開き、**有効化** にチェックを入れます。\n"
@@ -585,14 +626,14 @@ def load_config() -> dict:
 
 def save_config(config: dict) -> str:
     """設定をconfig.jsonに保存し、キャッシュをクリアする"""
-    global _lang_cache
     try:
         dir_path = os.path.dirname(CONFIG_PATH)
         if dir_path:
             os.makedirs(dir_path, exist_ok=True)
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4, ensure_ascii=False)
-        _lang_cache = None
+        # Refactor #2: _lang_cache の直接操作を廃止し invalidate_lang_cache() に統一
+        invalidate_lang_cache()
         return t("msg_settings_saved")
     except IOError as e:
         return f"{t('msg_settings_err')} {e}"
@@ -1016,7 +1057,8 @@ def preview_compose(image_folder, memo_file, match_threshold):
 
 def save_all_settings(language, image_folder, memo_file, match_threshold, generation_count, fallback, auto_lora,
                       gen_confidence, gen_positive, gen_negative, gen_custom, cat_base, cat_char, cat_nsfw,
-                      w1_path, w2_path, w3_path, lora_offset, output_sort_mode):
+                      w1_path, w2_path, w3_path, lora_offset, output_sort_mode,
+                      gen_mosaic_auto=False, gen_mosaic_level="Mosaic Med", gen_custom_dict_enabled=True):
     config = load_config()
     categories = cat_base + cat_char + cat_nsfw
     config.update({
@@ -1037,6 +1079,9 @@ def save_all_settings(language, image_folder, memo_file, match_threshold, genera
         "wildcard_3_path": _clean_path(w3_path),
         "lora_offset": float(lora_offset) if lora_offset is not None else 0.0,
         "output_sort_mode": output_sort_mode,
+        "gen_mosaic_auto": gen_mosaic_auto,
+        "gen_mosaic_level": gen_mosaic_level,
+        "gen_custom_dict_enabled": gen_custom_dict_enabled,
     })
     return save_config(config)
 
@@ -1180,12 +1225,21 @@ _TAG_CATEGORIES = {
         "couple", "group", "re:.*breasts?$", "re:^slim$", "re:^muscular", "petite", "chubby",
         "thick_thighs", "wide_hips", "narrow_waist", "abs", "navel", "midriff", "cleavage",
         "collarbone", "re:^shoulder", "re:_skin$", "re:^skin_", "pale", "tan", "re:^dark_skin",
-        "re:^nail", "re:^lip", "ear", "ears", "nose", "mole", "scar", "tattoo", "freckle"
+        "re:^nail", "re:^lip", "ear", "ears", "nose", "mole", "scar", "tattoo", "freckle",
+        "curvy", "plump", "slender", "fit", "athletic", "tall", "short", "average_body",
+        "1girl", "sole_female"
+    },
+    "cat_char_male": {
+        "1boy", "male", "guy", "man", "solo_male", "older_man", "muscular_male", "otoko", "re:^\\d+boys?"
     },
     "cat_char_hair": {
-        "re:_hair$", "re:^hair_", "bangs", "ponytail", "twintails", "braid", "ahoge", "sidelocks",
+        "re:_hair$", "re:^hair_", "re:hair$", "bangs", "ponytail", "twintails", "braid", "ahoge", "sidelocks",
         "bob_cut", "hime_cut", "pixie_cut", "drill_hair", "long_hair", "short_hair", "medium_hair",
-        "very_long_hair", "re:_eyes$", "heterochromia", "eyelashes", "pupils"
+        "very_long_hair", "bald", "shaved_head", "hair_bun", "hair_ornament", "over_one_eye", "hair_between_eyes"
+    },
+    "cat_char_eyes": {
+        "re:_eyes$", "re:^eyes_", "heterochromia", "eyelashes", "pupils", "makeup", "mascara", "eyeliner", "eyeshadow",
+        "re:.*_eyes$"
     },
     "cat_char_face": {
         "smile", "grin", "frown", "smirk", "re:^blush", "open_mouth", "closed_mouth",
@@ -1229,7 +1283,10 @@ _TAG_CATEGORIES = {
         "suspended_congress", "reverse_suspended_congress", "full_nelson", "cooperative_paizuri",
         "69_position", "buttjob", "straddling_paizuri", "piledriver_sex", "amazon_position",
         "human_stacking", "grinding", "mutual_fingering", "breast_press", "breast_sucking",
-        "self_breast_sucking", "groping", "symmetrical_docking", "torso_grab", "handjob_over_clothes",
+        "self_breast_sucking", "groping", "symmetrical_docking", "torso_grab", "waist_grab",
+        "neck_grab", "wrist_grab", "arm_grab", "leg_grab", "hand_grab",
+        "hand_on_another's_waist", "hand_on_another's_hip", "hand_on_another's_ass", "hand_on_another's_breast",
+        "handjob_over_clothes",
         "fingering_through_clothes", "fingering_through_panties", "hand_in_another's_panties",
         "tail_masturbation", "stealth_masturbation", "clothed_masturbation", "female_masturbation",
         "male_masturbation", "clitoral_stimulation", "nipple_pull", "box_tie", "frogtie", "hogtie",
@@ -1259,7 +1316,9 @@ _TAG_CATEGORIES = {
         "ass_focus", "breast_focus", "crotch_focus", "thigh_focus", "foot_focus", "armpit_focus",
         "impregnation", "stomach_bulge", "throat_bulge",
         "before_sex", "after_sex", "after_vaginal", "fucked_silly", "cross-section",
-        "close-up", "macro", "from_below", "from_above", "dutch_angle"
+        "close-up", "macro", "from_below", "from_above", "dutch_angle",
+        "disembodied_limb", "disembodied_arm", "disembodied_leg", "disembodied_hand", "disembodied_foot",
+        "severed_arm", "severed_leg", "amputation", "amputee", "grabbing", "reaching_out", "multiple_hands"
     },
     "cat_nsfw_fluids": {
         "cum", "creampie", "cum_on_face", "cum_on_breasts", "cum_in_pussy", "cum_inside", "cum_on_stomach",
@@ -1290,17 +1349,19 @@ _TAG_CATEGORIES = {
         "panty_lift", "smelling_underwear", "wedgie", "tentacles_under_clothes",
         "naked", "nude", "topless", "bottomless"
     },
-    "cat_nsfw_censored": {
+    "cat_nsfw_genitals": {
         "penis", "balls", "testicles", "erection", "vein", "precum", "foreskin",
         "pussy", "vagina", "clitoris", "labia", "cameltoe", "pubic_hair", "anus",
         "huge_penis", "monster_penis", "horse_penis", "tentacle_penetration", "multiple_penises", "futanari",
-        "uncensored", "censored", "bar_censor", "mosaic_censoring", "censor_steam",
         "holding_penis", "rubbing_penis", "fucking_machine", "glory_hole", "crotch",
         "nipples", "erect_nipples", "areola", "ass", "asshole", "butt",
         "spread_pussy", "gaping", "cleft_of_venus", "wet_shiny_vagina", "cervix",
         "urethra", "groin_tendon", "clitoral_hood", "erect_clitoris", "clitoris_slip",
         "puffy_nipples", "inverted_nipples", "presenting_nipples", "presenting_crotch",
-        "ofuda_on_pussy", "futa_with_female", "ovum", "fertilization", "sperm_cell"
+        "futa_with_female", "ovum", "fertilization", "sperm_cell"
+    },
+    "cat_nsfw_mosaic": {
+        "uncensored", "censored", "bar_censor", "mosaic_censoring", "censor_steam", "ofuda_on_pussy"
     },
     "cat_meta": {
         "highres", "absurdres", "masterpiece", "best_quality", "re:_quality$", "re:^rating_",
@@ -1309,15 +1370,33 @@ _TAG_CATEGORIES = {
     }
 }
 
+# ======================================================================
+# タグカテゴリ定数（UIとロジックで共有）
+# UI最適化: on_ui_tabs のネストスコープで定義していたローカル変数を
+# モジュールレベル定数に昇格させ、クロージャ参照の安全性を確保する
+# ======================================================================
+
+_CAT_BASE_KEYS = [
+    "cat_composition", "cat_pose", "cat_background",
+    "cat_nature", "cat_lighting", "cat_atmosphere", "cat_meta",
+]
+_CAT_CHAR_KEYS = [
+    "cat_char_base", "cat_char_male", "cat_char_hair",
+    "cat_char_eyes", "cat_char_face", "cat_char_clothes",
+]
+_CAT_NSFW_KEYS = [
+    "cat_nsfw_action", "cat_nsfw_creature", "cat_nsfw_item",
+    "cat_nsfw_focus", "cat_nsfw_fluids", "cat_nsfw_fetish",
+    "cat_nsfw_clothes_mess", "cat_nsfw_genitals", "cat_nsfw_mosaic",
+]
+_DEFAULT_CHAR_CATS = _CAT_CHAR_KEYS[:]  # デフォルト選択状態（Character全選択）
+
 
 def _get_easy_prompt_tags():
     """sdweb-easy-prompt-selector のタグフォルダから全タグを取得する"""
     tags = set()
     # デフォルトのインストールパスを想定
     easy_prompt_dir = os.path.join(os.path.dirname(EXTENSION_DIR), "sdweb-easy-prompt-selector", "tags")
-    if not os.path.exists(easy_prompt_dir):
-        # ユーザーが指定した絶対パス（もしあれば、将来的に設定可能にする）
-        easy_prompt_dir = r"C:\StableDiffusion\stable-diffusion-webui\extensions\sdweb-easy-prompt-selector\tags"
     
     if not os.path.exists(easy_prompt_dir) or yaml is None:
         return tags
@@ -1354,8 +1433,11 @@ _compiled_cat_patterns = {}
 def _filter_tags(tags: dict, confidence_threshold: float = 0.35, selected_categories=None, protect_easy_prompts: bool = True) -> dict:
     """許可タグカテゴリに含まれるタグのみ残すフィルタ (正規表現をキャッシュ)"""
     global _compiled_cat_patterns
-    if selected_categories is None:
+    if not selected_categories:
         selected_categories = list(_TAG_CATEGORIES.keys())
+
+    # Bug Fix #1/#2: filtered を関数冒頭で必ず初期化する（未定義によるNameError修正）
+    filtered = {}
 
     # EasyPromptのタグを取得
     easy_tags = _get_easy_prompt_tags() if protect_easy_prompts else set()
@@ -1375,26 +1457,68 @@ def _filter_tags(tags: dict, confidence_threshold: float = 0.35, selected_catego
                         allowed_tags.add(item)
         _compiled_cat_patterns[cache_key] = (allowed_tags, allowed_patterns)
 
-    filtered = {}
+    # カテゴリごとの上限設定
+    CAT_LIMITS = {
+        "cat_char_eyes": 6,
+        "cat_char_hair": 8,
+        "cat_char_face": 6,
+        "cat_char_clothes": 12,
+        "cat_char_base": 10,
+        "cat_nsfw_action": 10,
+    }
+
+    # 各カテゴリごとにマッチしたタグを一旦貯める
+    cat_matches = {cat: [] for cat in selected_categories}
+    # EasyPromptで保護されたタグ（上限計算外）
+    easy_protected = {}
+
     for tag, score in tags.items():
         if score < confidence_threshold:
             continue
 
         tag_clean = tag.strip().lower().replace(" ", "_")
 
-        # EasyPrompt に含まれるタグは無条件で残す (LoRA/Wildcard以外)
+        # Bug Fix #2: filtered が初期化済みのため EasyPrompt ブランチが正常動作
+        # EasyPrompt に含まれるタグは無条件でパス (上限計算外)
         if protect_easy_prompts and tag_clean in easy_tags:
-            filtered[tag_clean] = score
+            easy_protected[tag_clean] = score
             continue
 
+        matched_cat = None
+        # 直接一致を優先
         if tag_clean in allowed_tags:
-            filtered[tag_clean] = score
-            continue
+            # どのカテゴリに属するか特定
+            for cat in selected_categories:
+                if cat in _TAG_CATEGORIES and tag_clean in _TAG_CATEGORIES[cat]:
+                    matched_cat = cat
+                    break
+        else:
+            # キャッシュ済みパターンで正規表現マッチ
+            for cat in selected_categories:
+                if cat in _TAG_CATEGORIES:
+                    for item in _TAG_CATEGORIES[cat]:
+                        if item.startswith("re:"):
+                            p = re.compile(item[3:])
+                            if p.search(tag_clean):
+                                matched_cat = cat
+                                break
+                    if matched_cat:
+                        break
 
-        for p in allowed_patterns:
-            if p.search(tag_clean):
-                filtered[tag_clean] = score
-                break
+        if matched_cat:
+            cat_matches[matched_cat].append((tag_clean, score))
+        # Bug Fix #6: カテゴリにマッチしないタグは破棄（フィルタの意図通り）
+        # else: 以前は other_matches に入れていたが、フィルタ外タグは除外すべき
+
+    # カテゴリごとに上限を適用して統合
+    for cat, matches in cat_matches.items():
+        limit = CAT_LIMITS.get(cat, 999)
+        sorted_matches = sorted(matches, key=lambda x: x[1], reverse=True)
+        for t_clean, s in sorted_matches[:limit]:
+            filtered[t_clean] = s
+
+    # EasyPromptで保護されたタグを最後に統合（上限適用外）
+    filtered.update(easy_protected)
 
     return filtered
 
@@ -1557,14 +1681,14 @@ def get_stable_dimensions(img, mode="slider", slider_val=1024, min_val=512, max_
     return new_w, new_h
 
 
-def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_base, cat_char, cat_nsfw, custom_dict_str):
+def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_base, cat_char, cat_nsfw, custom_dict_str, gen_mosaic_auto=False, gen_mosaic_level="Mosaic Med", custom_dict_enabled=True):
     """画像を解析してメモエントリを生成"""
     gen_categories = cat_base + cat_char + cat_nsfw
     if image is None:
-        return "", t("msg_no_upload_err"), "", "", "512", "512"
+        return "", t("msg_no_upload_err"), "", "", "512", "512", ""
 
     if not section_name or not section_name.strip():
-        return "", t("msg_no_section_err"), "", "", "512", "512"
+        return "", t("msg_no_section_err"), "", "", "512", "512", ""
 
     try:
         section_name = section_name.strip()
@@ -1573,7 +1697,7 @@ def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_
 
         filtered, all_tags, error = _interrogate_image(image, confidence, gen_categories)
         if error:
-            return "", error, "", "", "512", "512"
+            return "", error, "", "", "512", "512", ""
 
         log_lines = []
         log_lines.append(t("log_all_tags").format(count=len(all_tags)))
@@ -1583,8 +1707,22 @@ def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_
         if excluded_count > 0:
             log_lines.append(t("log_excluded_tags").format(count=excluded_count))
 
+        # モザイク用プロンプトの自動付加
+        mosaic_extra = []
+        if gen_mosaic_auto:
+            is_mosaic = any(tag in all_tags for tag in ["mosaic_censoring", "censored", "bar_censor"])
+            if is_mosaic:
+                if gen_mosaic_level == t("mosaic_low") or gen_mosaic_level == "Mosaic Low":
+                    mosaic_extra = ["(mosaic_censoring:0.8)", "(light_mosaic:1.1)"]
+                elif gen_mosaic_level == t("mosaic_high") or gen_mosaic_level == "Mosaic High":
+                    mosaic_extra = ["(mosaic_censoring:1.4)", "(thick_mosaic:1.2)", "(detailed_mosaic:1.1)"]
+                else: # Medium
+                    mosaic_extra = ["(mosaic_censoring:1.1)", "(detailed_mosaic:1.0)"]
+                log_lines.append(f"🧱 Mosaic Auto-Prompt added ({gen_mosaic_level})")
+
+        only_tags_str = ", ".join(filtered)
         matched_custom_prompts = []
-        if custom_dict_str and custom_dict_str.strip():
+        if custom_dict_enabled and custom_dict_str and custom_dict_str.strip():
             for line in custom_dict_str.splitlines():
                 line = line.strip()
                 if not line or line.startswith("#"):
@@ -1611,6 +1749,8 @@ def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_
         components = []
         if pos:
             components.append(pos)
+        if mosaic_extra:
+            components.extend(mosaic_extra)
         if matched_custom_prompts:
             components.extend(matched_custom_prompts)
         if generated_tags:
@@ -1636,10 +1776,10 @@ def autogen_prompt(image, section_name, confidence, pos_prompt, neg_prompt, cat_
         )
         # Bug Fix: autogen_prompt から呼ぶ get_stable_dimensions は range モードで SD1.5 範囲を使用
         w, h = get_stable_dimensions(image, mode="range", min_val=512, max_val=1024)
-        return entry, "\n".join(log_lines), final_positive, neg, str(w), str(h)
+        return entry, "\n".join(log_lines), final_positive, neg, str(w), str(h), only_tags_str
 
     except Exception as e:
-        return "", f"❌ エラー: {e}\n{traceback.format_exc()}", "", "", "512", "512"
+        return "", f"❌ エラー: {e}\n{traceback.format_exc()}", "", "", "512", "512", ""
 
 
 def append_to_memo(memo_path, entry):
@@ -1680,7 +1820,7 @@ class RandomComposerScript(scripts.Script):
     sorting_priority = -100
 
     def title(self):
-        return "Smart Img2Img Composer (v2.4.1)"
+        return "Smart Img2Img Composer v1.0 (Stable)"
 
     def show(self, is_img2img):
         return scripts.AlwaysVisible if is_img2img else False
@@ -1695,9 +1835,10 @@ class RandomComposerScript(scripts.Script):
                 value=False,
                 elem_id="smart_composer_enabled",
             )
-            # アセット設定 (UI/UX: 有効時の視覚的ハイライトはCSSで対応)
-            with gr.Accordion(t("accordion_assets"), open=True):
-                with gr.Column():
+            # アセット設定: 視認性向上のためアコーディオンを分けすぎず整理
+            with gr.Row():
+                with gr.Column(variant="panel"):
+                    gr.Markdown(f"**{t('accordion_assets')}**")
                     with gr.Row():
                         en_char = gr.Checkbox(label=t("enable_random_char"), value=False, elem_id="smart_composer_en_char")
                         pos_char = gr.Radio(choices=[t("pos_front"), t("pos_back")], label=t("pos_label"), value=t("pos_back"), scale=0)
@@ -1714,37 +1855,34 @@ class RandomComposerScript(scripts.Script):
                         en_w3 = gr.Checkbox(label=t("wildcard_3"), value=False, elem_id="smart_composer_en_w3")
                         pos_w3 = gr.Radio(choices=[t("pos_front"), t("pos_back")], label=t("pos_label"), value=t("pos_back"), scale=0)
 
-            _sel_choices = [(t("sel_random"), "random"), (t("sel_sequential"), "sequential")]
-            selection_mode = gr.Radio(
-                label=t("selection_mode"),
-                choices=_sel_choices,
-                value="random",
-                elem_id="smart_composer_selection_mode",
-            )
-            override_prompt = gr.Checkbox(
-                label=t("overwrite_prompt"),
-                value=True,
-                elem_id="smart_composer_override",
-            )
-            _resize_choices = [
-                t("resize_none"),
-                t("resize_slider"),
-                t("resize_512"),
-                t("resize_1024"),
-                t("resize_1536"),
-            ]
-            resize_mode = gr.Dropdown(
-                label=t("resize_mode"),
-                choices=_resize_choices,
-                value=_resize_choices[0],
-                elem_id="smart_composer_resize_mode",
-            )
-            base_resolution = gr.Slider(
-                label=t("base_resolution"),
-                minimum=512, maximum=2048, step=64,
-                value=1024,
-                elem_id="smart_composer_base_resolution",
-            )
+            with gr.Row():
+                selection_mode = gr.Radio(
+                    label=t("selection_mode"),
+                    choices=[(t("sel_random"), "random"), (t("sel_sequential"), "sequential")],
+                    value="random",
+                    elem_id="smart_composer_selection_mode",
+                )
+                override_prompt = gr.Checkbox(
+                    label=t("overwrite_prompt"),
+                    value=True,
+                    elem_id="smart_composer_override",
+                )
+
+            with gr.Row():
+                _resize_choices = [t("resize_none"), t("resize_slider"), t("resize_512"), t("resize_1024"), t("resize_1536")]
+                resize_mode = gr.Dropdown(
+                    label=t("resize_mode"),
+                    choices=_resize_choices,
+                    value=_resize_choices[0],
+                    elem_id="smart_composer_resize_mode",
+                )
+                base_resolution = gr.Slider(
+                    label=t("base_resolution"),
+                    minimum=512, maximum=2048, step=64,
+                    value=1024,
+                    elem_id="smart_composer_base_resolution",
+                )
+
             with gr.Accordion(t("output_settings"), open=False):
                 output_sort_mode = gr.Dropdown(
                     label=t("sort_mode"),
@@ -1789,35 +1927,32 @@ class RandomComposerScript(scripts.Script):
                 img = Image.open(selected).convert("RGB")
                 p.init_images = [img]
 
-                _resize_choices = [
-                    t("resize_none"),
-                    t("resize_slider"),
-                    t("resize_512"),
-                    t("resize_1024"),
-                    t("resize_1536"),
-                ]
-                resize_idx = -1
-                if resize_mode in _resize_choices:
-                    resize_idx = _resize_choices.index(resize_mode)
+                # Bug Fix #7: インデックスのハードコードを廃止し、文字列キーで直接比較する
+                # これにより選択肢の順序変更に対して堅牢になる
+                _RESIZE_KEY_NONE   = t("resize_none")
+                _RESIZE_KEY_SLIDER = t("resize_slider")
+                _RESIZE_KEY_512    = t("resize_512")
+                _RESIZE_KEY_1024   = t("resize_1024")
+                _RESIZE_KEY_1536   = t("resize_1536")
 
-                if resize_idx > 0:
-                    mode_flag = "slider"
-                    min_v, max_v = 1024, 1536
+                if resize_mode == _RESIZE_KEY_SLIDER:
                     s_val = int(base_resolution) if base_resolution else 1024
-
-                    if resize_idx == 2:
-                        mode_flag = "range"
-                        min_v, max_v = 512, 1024
-                    elif resize_idx == 3:
-                        mode_flag = "range"
-                        min_v, max_v = 1024, 1536
-                    elif resize_idx == 4:
-                        mode_flag = "range"
-                        min_v, max_v = 1536, 1792
-
-                    new_w, new_h = get_stable_dimensions(img, mode_flag, s_val, min_v, max_v)
+                    new_w, new_h = get_stable_dimensions(img, "slider", s_val, 512, 1024)
                     p.width = new_w
                     p.height = new_h
+                elif resize_mode == _RESIZE_KEY_512:
+                    new_w, new_h = get_stable_dimensions(img, "range", 1024, 512, 1024)
+                    p.width = new_w
+                    p.height = new_h
+                elif resize_mode == _RESIZE_KEY_1024:
+                    new_w, new_h = get_stable_dimensions(img, "range", 1024, 1024, 1536)
+                    p.width = new_w
+                    p.height = new_h
+                elif resize_mode == _RESIZE_KEY_1536:
+                    new_w, new_h = get_stable_dimensions(img, "range", 1536, 1536, 1792)
+                    p.width = new_w
+                    p.height = new_h
+                # _RESIZE_KEY_NONE または未知の値の場合はリサイズしない
             except Exception as e:
                 print(f"[Smart Img2Img Composer] 画像読み込み失敗: {selected}, Error: {e}")
 
@@ -1914,7 +2049,7 @@ def on_ui_tabs():
 
     with gr.Blocks(analytics_enabled=False) as tab:
         gr.Markdown(
-            "# 🎲 Smart Img2Img Composer (v2.4.2)\n"
+            "# 🎲 Smart Img2Img Composer v1.0 (Stable)\n"
             + t("tab_header")
         )
 
@@ -2108,29 +2243,39 @@ def on_ui_tabs():
                             placeholder=t("section_ph"),
                             info=t("section_info"),
                         )
-                        _cat_base = ["cat_composition", "cat_pose", "cat_background", "cat_nature", "cat_lighting", "cat_atmosphere", "cat_meta"]
-                        _cat_char = ["cat_char_base", "cat_char_hair", "cat_char_face", "cat_char_clothes"]
-                        _cat_nsfw = ["cat_nsfw_action", "cat_nsfw_creature", "cat_nsfw_item", "cat_nsfw_focus", "cat_nsfw_fluids", "cat_nsfw_fetish", "cat_nsfw_clothes_mess", "cat_nsfw_censored"]
+                        _cat_base = _CAT_BASE_KEYS
+                        _cat_char = _CAT_CHAR_KEYS
+                        _cat_nsfw = _CAT_NSFW_KEYS
 
                         gr.Markdown(t("h_categories"))
+                        with gr.Row():
+                            gen_btn_toggle_all_cats = gr.Button(t("btn_toggle_all_cats"), size="sm", variant="secondary", scale=0)
+                            gr.Markdown("") # Spacer
+
+                        DEFAULT_CHAR_CATS = _DEFAULT_CHAR_CATS
+                        
                         with gr.Accordion(t("cat_base"), open=True):
+                            gen_base_toggle = gr.Button(t("btn_toggle_all"), size="sm", variant="secondary")
                             gen_cat_base = gr.CheckboxGroup(
                                 choices=[(t(c), c) for c in _cat_base],
-                                value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_base],
+                                value=lambda: [c for c in (load_config().get("gen_categories") or list(_TAG_CATEGORIES.keys())) if c in _cat_base],
                                 show_label=False
                             )
                         with gr.Accordion(t("cat_char"), open=False):
+                            gen_char_toggle = gr.Button(t("btn_toggle_all"), size="sm", variant="secondary")
                             gen_cat_char = gr.CheckboxGroup(
                                 choices=[(t(c), c) for c in _cat_char],
-                                value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_char],
+                                value=lambda: [c for c in (load_config().get("gen_categories") or DEFAULT_CHAR_CATS) if c in _cat_char],
                                 show_label=False
                             )
                         with gr.Accordion(t("cat_nsfw"), open=False):
+                            gen_nsfw_toggle = gr.Button(t("btn_toggle_all"), size="sm", variant="secondary")
                             gen_cat_nsfw = gr.CheckboxGroup(
                                 choices=[(t(c), c) for c in _cat_nsfw],
-                                value=lambda: [c for c in load_config().get("gen_categories", list(_TAG_CATEGORIES.keys())) if c in _cat_nsfw],
+                                value=lambda: [c for c in (load_config().get("gen_categories") or list(_TAG_CATEGORIES.keys())) if c in _cat_nsfw],
                                 show_label=False
                             )
+
                         gen_confidence = gr.Slider(
                             label=t("confidence"),
                             minimum=0.1, maximum=0.9, step=0.05,
@@ -2143,18 +2288,35 @@ def on_ui_tabs():
                             lines=2,
                             info=t("default_positive_info"),
                         )
-                        gen_custom_dict = gr.Textbox(
-                            label=t("custom_dict"),
-                            value=lambda: load_config().get("gen_custom_dict", "night, city > cyberpunk cityscape, neon lights, highly detailed, vivid colors\n1girl, smile > beautiful detailed eyes, glowing smile"),
-                            lines=3,
-                            info=t("custom_dict_info"),
-                        )
                         gen_negative = gr.Textbox(
                             label=t("default_negative"),
                             value=lambda: load_config().get("gen_negative", "lowres, blurry, artifact, bad anatomy, worst quality, low quality, jpeg artifacts"),
                             lines=2,
                             info=t("default_negative_info"),
                         )
+                        with gr.Accordion(t("custom_dict"), open=False):
+                            gen_custom_dict_enabled = gr.Checkbox(
+                                label=t("gen_custom_dict_enabled"),
+                                value=lambda: load_config().get("gen_custom_dict_enabled", False),
+                            )
+                            gen_custom_dict = gr.Textbox(
+                                label=None,
+                                value=lambda: load_config().get("gen_custom_dict", "night, city > cyberpunk cityscape, neon lights, highly detailed, vivid colors\n1girl, smile > beautiful detailed eyes, glowing smile"),
+                                lines=3,
+                                info=t("custom_dict_info"),
+                                show_label=False
+                            )
+                        with gr.Accordion(t("h_mosaic_settings"), open=False):
+                            with gr.Row():
+                                gen_mosaic_auto = gr.Checkbox(
+                                    label=t("gen_mosaic_auto"),
+                                    value=lambda: load_config().get("gen_mosaic_auto", False),
+                                )
+                                gen_mosaic_level = gr.Radio(
+                                    choices=[t("mosaic_low"), t("mosaic_med"), t("mosaic_high")],
+                                    label=t("gen_mosaic_level"),
+                                    value=lambda: load_config().get("gen_mosaic_level", t("mosaic_med")),
+                                )
                         with gr.Row():
                             gen_btn = gr.Button(t("btn_gen_tags"), variant="primary")
                             send_to_img2img_btn = gr.Button(t("btn_send_img2img"), variant="primary")
@@ -2185,6 +2347,11 @@ def on_ui_tabs():
                             label=t("analysis_log"),
                             interactive=False,
                             lines=8,
+                        )
+                        gen_only_tags = gr.Textbox(
+                            label=t("h_extracted_tags"),
+                            interactive=True,
+                            lines=5,
                         )
                         with gr.Row():
                             append_status = gr.Textbox(
@@ -2233,18 +2400,17 @@ def on_ui_tabs():
                         return gr.update()
                     path = get_mgr_path(mgr_label)
                     if path and os.path.exists(path):
-                        try:
-                            with open(path, "r", encoding="utf-8") as f:
-                                return f.read()
-                        except UnicodeDecodeError:
+                        # Bug Fix #5: except のネスト構文エラーを修正
+                        # try/except を正しいフラットな構造に書き直す
+                        for enc in ("utf-8", "utf-8-sig", "cp932"):
                             try:
-                                with open(path, "r", encoding="utf-8-sig") as f:
+                                with open(path, "r", encoding=enc,
+                                          errors=("ignore" if enc == "cp932" else "strict")) as f:
                                     return f.read()
+                            except (UnicodeDecodeError, LookupError):
+                                continue
                             except Exception:
-                                with open(path, "r", encoding="cp932", errors="ignore") as f:
-                                    return f.read()
-                        except Exception:
-                            pass
+                                break
                     return ""
 
                 def load_lora_with_baseline(mgr_label):
@@ -2333,10 +2499,10 @@ def on_ui_tabs():
                 # JavaScript for unsaved changes warning
                 gr.HTML(f"""
                     <script>
-                    function handle_lora_type_change(type, content, baseline) {{
+                    function smart_composer_lora_change(type, content, baseline) {{
                         if (content !== baseline) {{
                             if (!confirm("{t('lora_unsaved_warning')}")) {{
-                                return [null, content, baseline];
+                                return [type, content, baseline];
                             }}
                         }}
                         return [type, content, baseline];
@@ -2348,11 +2514,13 @@ def on_ui_tabs():
                     save_lora_mgr_btn = gr.Button(t("btn_save_lora_list"), variant="primary")
                     lora_mgr_msg = gr.Markdown("")
 
+                # Bug Fix #3: load_lora_with_baseline(mgr_label) は引数1個のため inputs を1個に修正
+                # _js で content/baseline を受け取る確認ダイアログは JS 側でのみ処理する
                 lora_mgr_type.change(
                     fn=load_lora_with_baseline,
-                    inputs=[lora_mgr_type, lora_mgr_content, lora_mgr_baseline],
+                    inputs=[lora_mgr_type],
                     outputs=[lora_mgr_content, lora_mgr_baseline],
-                    _js="handle_lora_type_change"
+                    _js="(type, content, baseline) => smart_composer_lora_change(type, content, baseline)"
                 )
                 save_lora_mgr_btn.click(
                     fn=save_lora_list,
@@ -2397,7 +2565,8 @@ def on_ui_tabs():
         _common_save_inputs = [
             language_selector, image_folder, memo_file, match_threshold, generation_count, fallback_enabled, auto_lora_enabled,
             gen_confidence, gen_positive, gen_negative, gen_custom_dict, gen_cat_base, gen_cat_char, gen_cat_nsfw,
-            w1_path, w2_path, w3_path, lora_offset_slider, output_sort_selector
+            w1_path, w2_path, w3_path, lora_offset_slider, output_sort_selector,
+            gen_mosaic_auto, gen_mosaic_level, gen_custom_dict_enabled
         ]
 
 
@@ -2429,8 +2598,37 @@ def on_ui_tabs():
         )
         gen_btn.click(
             fn=autogen_prompt,
-            inputs=[gen_image, gen_section, gen_confidence, gen_positive, gen_negative, gen_cat_base, gen_cat_char, gen_cat_nsfw, gen_custom_dict],
-            outputs=[gen_output, gen_log, hidden_gen_pos, hidden_gen_neg, hidden_gen_w, hidden_gen_h],
+            inputs=[
+                gen_image, gen_section, gen_confidence, gen_positive, gen_negative,
+                gen_cat_base, gen_cat_char, gen_cat_nsfw, gen_custom_dict,
+                gen_mosaic_auto, gen_mosaic_level, gen_custom_dict_enabled
+            ],
+            outputs=[gen_output, gen_log, hidden_gen_pos, hidden_gen_neg, hidden_gen_w, hidden_gen_h, gen_only_tags],
+        )
+
+        # ─── トグル/一括操作ロジック ───
+        # 全カテゴリ一括選択/解除: いずれかが選択済みなら全解除、全未選択なら全選択
+        gen_btn_toggle_all_cats.click(
+            fn=lambda cb, cc, cn: (
+                [] if (cb or cc or cn) else (_cat_base, _cat_char, _cat_nsfw)
+            ),
+            inputs=[gen_cat_base, gen_cat_char, gen_cat_nsfw],
+            outputs=[gen_cat_base, gen_cat_char, gen_cat_nsfw]
+        )
+        gen_base_toggle.click(
+            fn=lambda x: _cat_base if not x else [],
+            inputs=[gen_cat_base],
+            outputs=gen_cat_base
+        )
+        gen_char_toggle.click(
+            fn=lambda x: _cat_char if not x else [],
+            inputs=[gen_cat_char],
+            outputs=gen_cat_char
+        )
+        gen_nsfw_toggle.click(
+            fn=lambda x: _cat_nsfw if not x else [],
+            inputs=[gen_cat_nsfw],
+            outputs=gen_cat_nsfw
         )
 
         send_to_img2img_btn.click(
