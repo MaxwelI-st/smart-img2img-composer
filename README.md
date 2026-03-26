@@ -1,4 +1,6 @@
-# 🎲 Smart Img2Img Composer v1.0.2 Stable
+# 🎲 Smart Img2Img Composer v1.1 Stable
+
+[日本語版はこちら (README_ja.md)](README_ja.md)
 
 ![Smart Img2Img Composer Banner](docs/images/hero_banner.png)
 
@@ -9,20 +11,20 @@ A professional-grade extension for AUTOMATIC1111 Stable Diffusion WebUI. Automat
 
 ---
 
-## 🌟 v1.0.2 Stable Highlights
+## 🌟 What's New in v1.1
+Version 1.1.2 introduces enhanced UI organization, a dedicated inventory management system, and significantly expanded specialized tag libraries.
 
-In v1.0.2 Stable, we've integrated numerous critical bug fixes and usability enhancements (automatic LoRA template generation, enhanced EasyPrompt search, etc.) on top of the complete UI/UX overhaul.
+### 📦 Dedicated Inventory Management Tab
+Total control over randomization variety. A new standalone tab allows you to monitor usage counts for every LoRA and wildcard asset. This ensures maximum diversity in large-scale generations by prioritizing underused items. Features real-time stock checking and granular reset options.
 
-### 🎨 Refined Dual-Column Layout
-We introduced a streamlined 2-column architecture: **Configuration on the left**, **Preview on the right**. This ensures that every adjustment is immediately visible, creating a frictionless workflow.
+### 🚀 Improved img2img Synchronization
+The integration is now truly bi-directional. The "Send to img2img" button now transfers **both the generated prompt and the source image** directly into the main img2img generation tab with a single click, eliminating manual file uploads.
 
-![Main Settings & Preview](docs/images/ui_main_v1_0.png)
+### 🔞 Expanded NSFW & Fetish Tag Library
+Massively expanded specialized tag definitions including machine FET (milking, breast pumps), fluids, and detailed fetish states. Complemented by **📏 Group-Based Tag Limits** (Base, Character, NSFW) to maintain perfect prompt balance.
 
-### 🩺 Real-Time Path Health Check
-Validation is now instantaneous. Each path input features a **✅/❌ Status Icon** that updates in real-time. Never waste time on a "path not found" error after starting a long generation run again.
-
-### 🚀 High-Contrast Professional Interface
-Critical action buttons are now styled in **high-visibility Professional Orange**. This intuitive layout ensures that complex batch settings can be executed with confidence and speed.
+### 🧱 Intelligent Mosaic Auto-Prompting
+Automatically detects censorship in uploaded images and injects weight-adjusted mosaic prompts (Low/Med/High) to ensure consistency in generated results.
 
 ---
 
@@ -43,8 +45,6 @@ Automatically organize your generated masterpieces into subfolders based on Pres
 
 Powered by deep integration with WD14 Tagger.
 
-![Prompt Auto-Generation](docs/images/ui_autogen_v1_0.png)
-
 - **Categorized Smart Extraction**: Filter tags precisely by Composition, Pose, Lighting, NSFW, and more.
 - **Global Category Toggle**: Instantly select or deselect groups of tags with one click.
 - **Custom Dictionary Translation**: Automatically transform raw extracted tags into your preferred descriptive style or highly-detailed phrases.
@@ -55,8 +55,6 @@ Powered by deep integration with WD14 Tagger.
 
 Located natively at the bottom of the img2img tab. Designed to work in perfect harmony with ADetailer, ControlNet, and other popular extensions.
 
-![img2img Integration](docs/images/ui_img2img_v1_0.png)
-
 - **Random Injection Slots**: Manage 5 slots (Character, Situation, and 3 Wildcards) for dynamic randomization.
 - **Strategic Prompt Positioning**: Choose to inject your random prompts either "Before" or "After" the main prompt for maximum architectural control.
 
@@ -65,8 +63,6 @@ Located natively at the bottom of the img2img tab. Designed to work in perfect h
 ## 📖 Quick Start Guide
 
 A comprehensive manual is built directly into the UI via the "**📖 User Manual**" tab.
-
-![User Manual](docs/images/ui_manual_v1_0.png)
 
 1.  **Configure**: Set your Image Folder and Memo File in the "⚙️ Settings & Preview" tab.
 2.  **Verify**: Save your Preset and ensure all Health Check icons are **✅**.
