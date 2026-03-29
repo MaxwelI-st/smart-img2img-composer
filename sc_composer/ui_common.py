@@ -1,17 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-from .i18n import t
-from .utils import _clean_path
-from .constants import CONFIG_PATH
-
-def check_individual_health(path: str, label: str) -> str:
-    path = _clean_path(path)
-    if not path: return label
-    if os.path.exists(path):
-        return label.replace("❌ ", "").replace(" ❌", "")
-    if "❌" not in label:
-        return f"❌ {label}"
-    return label
 
 def update_ref_tags(profile_name: str):
     from .constants import PROMPT_PROFILES

@@ -1,80 +1,87 @@
-# 🎲 Smart Img2Img Composer v1.1 Stable
+# Smart Img2Img Composer v1.1.2 Stable
 
-[日本語版はこちら (README_ja.md)](README_ja.md)
+[日本語版 (README_ja.md)](README_ja.md)
 
-![Smart Img2Img Composer Banner](docs/images/hero_banner.png)
+![Smart Img2Img Composer Overview](docs/images/1en.png)
 
-### **"Mass Production, Met Art Quality."**
-**The ultimate batch generation and management solution for YouTube Shorts, TikTok, and SNS content creators.**
+## Overview
+An advanced prompt construction and asset management architecture for the AUTOMATIC1111 Stable Diffusion WebUI, designed to control and integrate img2img workflows.
+Equipped with autonomous tag analysis from reference images, memo file synchronization, and a unique lottery system for LoRAs and wildcards, it automates tedious batch processing and prompt building, drastically improving creative efficiency.
 
-A professional-grade extension for AUTOMATIC1111 Stable Diffusion WebUI. Automate the combination of massive image assets and prompts, reducing creative workload by up to 80%.
+## Key Features
 
----
+### 🧠 Autonomous Tag Analysis & Prompt Construction (Tagger Analyzer)
 
-## 🌟 What's New in v1.1
-Version 1.1.2 introduces enhanced UI organization, a dedicated inventory management system, and significantly expanded specialized tag libraries.
+![Tag Analysis and Auto Prompt Gen](docs/images/2en.png)
 
-### 📦 Dedicated Inventory Management Tab
-Total control over randomization variety. A new standalone tab allows you to monitor usage counts for every LoRA and wildcard asset. This ensures maximum diversity in large-scale generations by prioritizing underused items. Features real-time stock checking and granular reset options.
+*   In the **Prompt Generator** tab, it integrates with WD14 Tagger to extract high-precision tags using deep learning.
+*   Individual sliders for categories such as Composition, Background, Character, and Lighting allow fine-tuned control over "Confidence Thresholds."
+*   Automatically detects mosaic attributes in images and injects corresponding tags.
+*   Once satisfied with the extracted prompt, use the dedicated button to **warp to the img2img tab** while maintaining all data, enabling an immediate 1-click generation start.
 
-### 🚀 Improved img2img Synchronization
-The integration is now truly bi-directional. The "Send to img2img" button now transfers **both the generated prompt and the source image** directly into the main img2img generation tab with a single click, eliminating manual file uploads.
+### 🔗 Filename-Driven Automatic Prompt Synchronization
 
-### 🔞 Expanded NSFW & Fetish Tag Library
-Massively expanded specialized tag definitions including machine FET (milking, breast pumps), fluids, and detailed fetish states. Complemented by **📏 Group-Based Tag Limits** (Base, Character, NSFW) to maintain perfect prompt balance.
+*   Automatically matches filenames in the **Reference Image Folder** with section names (e.g., `[image_01]`) in your **Memo File** (.txt).
+*   The **Match Threshold** slider in the UI provides flexibility for non-exact matches, ensuring seamless application of image-specific prompts and targeted LoRAs during bulk processing.
 
-### 🧱 Intelligent Mosaic Auto-Prompting
-Automatically detects censorship in uploaded images and injects weight-adjusted mosaic prompts (Low/Med/High) to ensure consistency in generated results.
+### 🛡️ Profile-Dependent Negative Prompt Optimization (Smart Negative)
 
----
+![Smart Negative Feature](docs/images/3en.png)
 
-## 🛠️ Powerful Core Systems
+*   Select your target model (SDXL, Pony, Illustrious, etc.) from the **Active Profile** dropdown. When **Smart Negative** is enabled, it automatically adds or overwrites optimal negative prompts for that specific model.
+*   The prompt order is also optimized. For example, selecting the Pony profile automatically sorts critical quality tags like `score_9, score_8_up...` to the beginning, boosting overall generation quality.
 
-### 1. 📂 Advanced Preset Management
-Save and load complex configurations — including folder paths, thresholds, and resolutions — as "Presets". Seamlessly switch between different projects or characters with a single click.
+### 📦 Bias-Prevention Autonomous Inventory Control (Inventory Logic)
 
-### 2. 🧬 High-Precision LoRA Global Tuning
-Fine-tune the weights of all active LoRAs simultaneously using a global slider with **0.05 increments**. Achieve the perfect balance and stylistic nuance for every batch.
+![Inventory Control System](docs/images/4en.png)
 
-### 3. 📁 Intelligent Output Sorting
-Automatically organize your generated masterpieces into subfolders based on Preset Name, Section Name, or Date. Eliminate the chaos of "mixed-output" directories forever.
+*   The system monitors usage counts for randomized LoRAs and wildcards registered in the **Asset Lists** tab, visible on the **Inventory** dashboard.
+*   The lottery logic prioritizes unused or infrequently used assets during generation, preventing repetitive "LoRA fatigue" and ensuring maximum diversity in large-scale productions.
 
----
+### 🪄 Auto-Syntax Repair & Custom Dictionary Protocol
 
-## ✨ Cutting-Edge Auto-Prompting (WD14 Tagger)
+*   The **Custom Dictionary** expands short memos like `night, city > cyberpunk cityscape, neon lights...` into rich, descriptive prompts automatically.
+*   With **Prompt Polish** enabled, common syntax errors like double commas (`, ,`), stray spaces, or mismatched brackets are automatically cleaned up right before generation.
 
-Powered by deep integration with WD14 Tagger.
+### 🎛️ Fail-Safe Design & High-Density UI
 
-- **Categorized Smart Extraction**: Filter tags precisely by Composition, Pose, Lighting, NSFW, and more.
-- **Global Category Toggle**: Instantly select or deselect groups of tags with one click.
-- **Custom Dictionary Translation**: Automatically transform raw extracted tags into your preferred descriptive style or highly-detailed phrases.
+![Streamlined Professional UI Design](docs/images/5en.png)
 
----
-
-## 🎲 Seamless img2img Integration
-
-Located natively at the bottom of the img2img tab. Designed to work in perfect harmony with ADetailer, ControlNet, and other popular extensions.
-
-- **Random Injection Slots**: Manage 5 slots (Character, Situation, and 3 Wildcards) for dynamic randomization.
-- **Strategic Prompt Positioning**: Choose to inject your random prompts either "Before" or "After" the main prompt for maximum architectural control.
+*   **Health Check**: Real-time path validation for folders and files with ✅ / ❌ indicators on the UI to prevent execution errors.
+*   **Compact UI**: Space-saving optimization of standard Gradio layouts organizes sliders and checkboxes into efficient single-line rows.
+*   **Smart Output Sorting**: Change the **Sort Mode** in the **Output Settings** within the img2img tab to automatically create subfolders by "Preset Name" or "Date," keeping outputs organized without breaking standard save paths.
 
 ---
 
-## 📖 Quick Start Guide
+## Installation
+1. Open the `Extensions` tab in AUTOMATIC1111 WebUI.
+2. Go to the `Install from URL` tab and paste this repository's URL.
+3. Click "Install" and then "Apply and restart UI."
 
-A comprehensive manual is built directly into the UI via the "**📖 User Manual**" tab.
-
-1.  **Configure**: Set your Image Folder and Memo File in the "⚙️ Settings & Preview" tab.
-2.  **Verify**: Save your Preset and ensure all Health Check icons are **✅**.
-3.  **Generate**: Enable the extension in the img2img tab and press "Generate".
-
----
-
-## 📦 Built for Reliability
-- **Complete Internationalization (i18n)**: Fully supported in Japanese and English.
-- **Enterprise-Grade Compatibility**: Works alongside ADetailer, ControlNet, Dynamic Prompts, and FABRIC.
-- **State Persistence**: Securely stores settings in `config.json`.
+*Note: The "WD14 Tagger" extension must be installed and active to use the Auto-Prompt Gen feature.*
 
 ---
 
-Licensed under the MIT License. Developed for Professional Creators.
+## Usage Workflow
+This system coordinates "Preparation & Testing" in a dedicated tab with "Execution" in the img2img tab.
+
+### 1. ⚙️ Global Settings & Preset Management
+Navigate to the "Settings & Preview" tab under "Smart Img2Img Composer."
+*   **Path Configuration**: Specify paths for the `Reference Image Folder` and `Memo File`. A ✅ health check indicates successful recognition.
+*   **Profiles & Optimization**: Choose your `Active Profile` and enable features like `Smart Negative` or `Prompt Polish`.
+*   **Saving Presets**: Save your current configuration as a "Preset" to recall environments instantly from the dropdown menu.
+
+### 2. 🏷️ Tag Analysis & 1-Click Warp (Prompt Generator)
+Handle individual image analysis and test generates in the "Prompt Generator" tab.
+*   Analyze uploaded images using WD14 Tagger and adjust category sliders for optimal tag extraction.
+*   Once satisfied, use the dedicated button to **warp to the img2img tab** with all data intact.
+
+### 3. 🎲 Asset Lists & Inventory Control
+*   **Asset Lists**: Directly manage and edit lists of Character LoRAs, Situation LoRAs, and Wildcards within the WebUI.
+*   **Inventory Control**: When Inventory Mode is enabled, monitor global usage counts (stock) here and reset them as needed.
+
+### 4. 🖼️ Img2Img Execution & Organization
+Expand the "Smart Img2Img Composer" accordion in the `img2img` tab.
+*   **Enable**: Activate the extension to start automated batch processing with folder monitoring, memo synchronization, and inventory lottery logic.
+*   **Random Slots**: Control where random LoRAs are injected (Front, Back, or after specific tags).
+*   **Organization (Output Settings)**: Set the `Sort Mode` to "By Preset" or "By Date" for automatic image sorting.

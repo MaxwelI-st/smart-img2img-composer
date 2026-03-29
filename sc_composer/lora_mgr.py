@@ -23,6 +23,11 @@ def get_mgr_path(mgr_label):
     }
     return mapping.get(mgr_key)
 
+def _ensure_dir(path):
+    if not path: return
+    d = os.path.dirname(path)
+    if d: os.makedirs(d, exist_ok=True)
+
 def load_lora_list(mgr_label):
     if mgr_label is None: return ""
     path = get_mgr_path(mgr_label)
@@ -37,7 +42,7 @@ def load_lora_list(mgr_label):
 def save_lora_list(mgr_label, content):
     path = get_mgr_path(mgr_label)
     if path:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        _ensure_dir(path)
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
         return t("msg_lora_saved"), content
@@ -48,7 +53,7 @@ def append_lora_list(mgr_label, input_text):
         return load_lora_list(mgr_label), ""
     
     path = get_mgr_path(mgr_label)
-    if not path: return "Error", "", ""
+    if not path: return "Error: Path not found", ""
 
     current = load_lora_list(mgr_label)
     new_line = input_text.strip()
@@ -56,7 +61,7 @@ def append_lora_list(mgr_label, input_text):
         current += "\n"
     current += new_line + "\n"
 
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    _ensure_dir(path)
     with open(path, "w", encoding="utf-8") as f:
         f.write(current)
     return current, ""

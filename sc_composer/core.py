@@ -17,18 +17,14 @@ def load_config() -> dict:
                 for k in ["image_folder", "memo_file", "wildcard_1_path", "wildcard_2_path", "wildcard_3_path"]:
                     if k in config and isinstance(config[k], str):
                         config[k] = _clean_path(config[k])
-                if config.get("gen_categories") == []:
-                    config["gen_categories"] = None
                 return config
-        except (json.JSONDecodeError, IOError):
-            pass
+        except Exception: pass
     return dict(DEFAULT_CONFIG)
 
 def save_config(config: dict) -> str:
     try:
         dir_path = os.path.dirname(CONFIG_PATH)
-        if dir_path:
-            os.makedirs(dir_path, exist_ok=True)
+        if dir_path: os.makedirs(dir_path, exist_ok=True)
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4, ensure_ascii=False)
         invalidate_lang_cache()
@@ -37,303 +33,217 @@ def save_config(config: dict) -> str:
         return f"{t('msg_settings_err')} {e}"
 
 def load_inventory():
-    if not os.path.exists(INVENTORY_PATH):
-        return {}
+    if not os.path.exists(INVENTORY_PATH): return {}
     try:
-        with open(INVENTORY_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
+        with open(INVENTORY_PATH, "r", encoding="utf-8") as f: return json.load(f)
+    except Exception: return {}
 
 def save_inventory(data):
     try:
         with open(INVENTORY_PATH, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print(f"[Smart Img2Img Composer] Failed to save inventory: {e}")
+    except Exception: pass
 
 def get_inventory_weighted_choice(item_list, category_key):
-    if not item_list:
-        return None
+    if not item_list: return None
     inventory = load_inventory()
-    category_history = dict(inventory.get(category_key, {}))
-    counts = [int(category_history.get(item, -1)) for item in item_list]
-    existing_counts = [c for c in counts if c >= 0]
-    avg_count = int(sum(existing_counts) / len(existing_counts)) if existing_counts else 0
-    initial_count = max(0, avg_count - 2)
+    cat_hist = dict(inventory.get(category_key, {}))
     for item in item_list:
-        if item not in category_history:
-            category_history[item] = initial_count
-    final_counts = [int(category_history[item]) for item in item_list]
-    weights = [1.0 / (float(c) + 1.0) for c in final_counts]
+        if item not in cat_hist: cat_hist[item] = 0
+    weights = [1.0 / (float(cat_hist[item]) + 1.0) for item in item_list]
     choice = random.choices(item_list, weights=weights, k=1)[0]
-    category_history[choice] = int(category_history[choice]) + 1
-    new_inventory = dict(inventory)
-    new_inventory[category_key] = category_history
-    save_inventory(new_inventory)
+    cat_hist[choice] += 1
+    inventory[category_key] = cat_hist
+    save_inventory(inventory)
     return choice
 
 def parse_memo_file(memo_path: str) -> dict:
     memo_path = _clean_path(memo_path)
     sections = {}
-    if not memo_path or not os.path.isfile(memo_path):
-        return sections
-
-    def _join_lines(lines: list) -> str:
-        if not lines: return ""
-        combined = ", ".join(lines)
-        parts = [p.strip() for p in combined.split(",") if p.strip()]
-        return ", ".join(parts)
-
-    current_key, current_mode = None, "positive"
-    current_positive, current_negative, current_lora = [], [], []
-
-    def save_section():
-        nonlocal current_key, current_positive, current_negative, current_lora
-        if current_key is None: return
-        pos = _join_lines(current_positive)
-        neg = _join_lines(current_negative)
-        lora = list(current_lora)
-        if pos or neg or lora:
-            sections[current_key] = {"positive": pos, "negative": neg, "lora": lora}
-
+    if not memo_path or not os.path.isfile(memo_path): return sections
     try:
         content = ""
         for enc in ("utf-8", "utf-8-sig", "cp932"):
             try:
-                with open(memo_path, "r", encoding=enc, errors=("ignore" if enc == "cp932" else "strict")) as f:
-                    content = f.read()
+                with open(memo_path, "r", encoding=enc) as f: content = f.read()
                 break
             except Exception: continue
-        
         if not content: return sections
-
+        cur_key, cur_data, mode = None, {"positive": [], "negative": [], "lora": []}, "positive"
+        def _save():
+            if cur_key:
+                sections[cur_key] = {
+                    "positive": ", ".join(cur_data["positive"]),
+                    "negative": ", ".join(cur_data["negative"]),
+                    "lora": cur_data["lora"]
+                }
         for line in content.splitlines():
-            stripped = line.strip()
-            if stripped.startswith("#"): continue
-            match = re.match(r"^\[(.+)\]\s*$", stripped)
-            if match:
-                save_section()
-                current_key = match.group(1).strip().lower()
-                current_mode, current_positive, current_negative, current_lora = "positive", [], [], []
+            s_raw = line.strip()
+            if not s_raw or s_raw.startswith("#"): continue
+            m = re.match(r"^\[(.+)\]$", s_raw)
+            if m:
+                _save(); cur_key = m.group(1).strip().lower()
+                cur_data, mode = {"positive": [], "negative": [], "lora": []}, "positive"
                 continue
-            if stripped.lower() in ("positive:", "positive"):
-                current_mode = "positive"
-                continue
-            if stripped.lower() in ("negative:", "negative"):
-                current_mode = "negative"
-                continue
-            if stripped.lower() in ("lora:", "lora"):
-                current_mode = "lora"
-                continue
-            if current_key is not None and stripped:
-                if current_mode == "negative": current_negative.append(stripped)
-                elif current_mode == "lora": current_lora.append(stripped)
-                else: current_positive.append(stripped)
-        save_section()
-    except Exception as e:
-        print(f"[Smart Img2Img Composer] Memo parse error: {e}")
+            
+            # P2: "positive:" と "positive" 両方を受け付ける
+            s_low = s_raw.lower().rstrip(":").strip()
+            if s_low in ("positive", "negative", "lora"):
+                mode = s_low; continue
+            if cur_key: cur_data[mode].append(s_raw)
+        _save()
+    except Exception: pass
     return sections
 
-def match_image_to_sections(image_path: str, sections: dict, threshold: float) -> list:
-    if not image_path or not sections: return []
-    from difflib import SequenceMatcher
-    filename = os.path.splitext(os.path.basename(image_path))[0].lower()
-    best_matches, max_score = [], 0
-    for section in sections.keys():
-        if section.lower() == "default": continue
-        score = SequenceMatcher(None, filename, section.lower()).ratio()
-        if score >= threshold:
-            if score > max_score:
-                max_score, best_matches = score, [section]
-            elif score == max_score:
-                best_matches.append(section)
-    if best_matches:
-        return [sections[best_matches[0]]]
-    return []
+def compose_prompt(folder, memo, threshold, fallback=True, auto_l=True, l_off=0.0, w1="", w2="", w3="", prof_name="Standard / SDXL", inv_mode=False, selection_mode="random"):
+    """5タプル (img_path, pos, neg, log, section_name) を返す共通関数。
+    UI プレビュー用には compose_prompt_preview() を使うこと。"""
+    return _compose_core(folder, memo, threshold, selection_mode=selection_mode)
 
-def compose_prompt(image_folder: str, memo_file: str, match_threshold: float, selection_mode="Random") -> tuple:
-    log = []
+def compose_prompt_preview(folder, memo, threshold, fallback=True, auto_l=True, l_off=0.0, w1="", w2="", w3="", prof_name="Standard / SDXL", inv_mode=False):
+    """設定タブの「構成テスト」ボタン用: プレビュー文字列を返す。"""
+    img, pos, neg, log, sec = _compose_core(folder, memo, threshold)
+    if not img: return log
+    from .constants import PROMPT_PROFILES
+    profile = PROMPT_PROFILES.get(prof_name, next(iter(PROMPT_PROFILES.values())))
+    p_neg = profile.get("neg", "")
+    return f"--- PREVIEW ---\nSection: [{sec}]\nImage: {os.path.basename(img)}\n\nPositive:\n{pos}\n\nNegative:\n{neg}\n(Profile Neg: {p_neg})\n\nLog:\n{log}"
+
+def _compose_core(folder, memo, threshold, selection_mode="random"):
+    from .utils import get_image_files, _clean_path
+    folder_clean = _clean_path(folder)
+    memo_clean = _clean_path(memo)
+    files = get_image_files(folder_clean)
+    if not files: return None, "", "", t("no_images"), ""
     config = load_config()
-    fallback_enabled = config.get("fallback_enabled", True)
-    auto_lora_enabled = config.get("auto_lora_enabled", True)
-
-    image_files = get_image_files(image_folder)
-    if not image_files: return None, "", "", t("no_images"), ""
-
     if selection_mode == "sequential":
-        last_index = config.get("last_sequential_index", 0)
-        index = last_index % len(image_files)
-        selected = image_files[index]
-        config["last_sequential_index"] = index + 1
-        save_config(config)
-        log.append(t("log_sel_sequential").format(index=index + 1, total=len(image_files), filename=os.path.basename(selected)))
-    else:
-        selected = random.choice(image_files)
-        log.append(t("log_sel_random").format(filename=os.path.basename(selected)))
-
-    sections = parse_memo_file(memo_file)
-    if not sections:
-        log.append(t("log_no_sections"))
-        return selected, "", "", "\n".join(log), ""
-
-    log.append(t("log_sections_count").format(count=len(sections)))
-    matched = match_image_to_sections(selected, sections, match_threshold)
-    matched_section_name = ""
-
-    if not matched:
-        if fallback_enabled and "default" in sections:
-            log.append(t("log_fallback"))
-            matched = [sections["default"]]
-            matched_section_name = "default"
-        else:
-            log.append(t("log_no_match"))
-            return selected, "", "", "\n".join(log), ""
-    else:
-        # Find exact section name for logging
-        filename = os.path.splitext(os.path.basename(selected))[0].lower()
-        from difflib import SequenceMatcher
-        for section in sections.keys():
-            if section == "default": continue
-            if SequenceMatcher(None, filename, section.lower()).ratio() >= match_threshold:
-                matched_section_name = section
-                break
-
-    pos_parts, neg_parts, lora_parts = [], [], []
-    seen_pos, seen_neg, seen_lora = set(), set(), set()
+        idx = config.get("last_sequential_index", 0) % len(files)
+        sel = files[idx]; config["last_sequential_index"] = idx + 1; save_config(config)
+    else: sel = random.choice(files)
+    sections = parse_memo_file(memo_clean)
+    if not sections: return sel, "", "", t("log_no_sections"), ""
+    from difflib import SequenceMatcher
+    fname = os.path.splitext(os.path.basename(sel))[0].lower()
+    # Score should be -1.0 to allow 0.0 match
+    for k in sections:
+        if k == "default": continue
+        sc = SequenceMatcher(None, fname, k).ratio()
+        if sc >= threshold and sc > best_score: best_score, best_sec = sc, k
+    if not best_sec:
+        if "default" in sections: best_sec = "default"
+        else: return sel, "", "", t("log_no_match"), ""
     
-    inventory_mode = config.get("inventory_mode", False)
+    data = sections[best_sec]
+    pos = data.get("positive", "")
+    neg = data.get("negative", "")
+    loras = data.get("lora", [])
+    if loras:
+        # Append LoRA tags to positive prompt
+        pos = ", ".join([pos] + loras) if pos else ", ".join(loras)
+    return sel, pos, neg, f"Matched: {best_sec} ({best_score:.2f})", best_sec
 
-    for m in [m for m in matched if m.get("positive") or m.get("negative") or m.get("lora")]:
-        p, n, l_list = m.get("positive", ""), m.get("negative", ""), m.get("lora", [])
-        
-        # Handle Dynamic Prompts / Wildcards inside memo
-        if "__" in p or "{" in p:
-            # If inventory mode is on, we might want to handle it differently
-            # but usually WebUI extensions (Dynamic Prompts) handle this later.
-            pass
+def apply_lora_offset(prompt: str, offset: float) -> str:
+    if offset == 0.0: return prompt
+    def repl(m):
+        base, val = m.group(1), float(m.group(2))
+        new_val = max(0.0, min(2.0, val + offset))
+        return f"<lora:{base}:{new_val:.2f}>"
+    return re.sub(r'<lora:([^:]+):([-+]?\d*\.?\d+)>', repl, prompt)
 
-        if p and p not in seen_pos:
-            seen_pos.add(p); pos_parts.append(p)
-        if n and n not in seen_neg:
-            seen_neg.add(n); neg_parts.append(n)
-        
-        if l_list:
-            if inventory_mode:
-                l_item = get_inventory_weighted_choice(l_list, f"lora_{matched_section_name}")
-            else:
-                l_item = random.choice(l_list)
-            
-            if l_item and l_item not in seen_lora:
-                seen_lora.add(l_item)
-                if auto_lora_enabled: lora_parts.append(f"<lora:{l_item}>")
-
-    if lora_parts: pos_parts = lora_parts + pos_parts
-    positive = _polish_prompt(", ".join(pos_parts))
-    negative = _polish_prompt(", ".join(neg_parts))
-
-    log.append(t("log_match_count").format(count=len(matched)))
-    return selected, positive, negative, "\n".join(log), matched_section_name
-
-def save_all_settings(lang, img_f, memo, threshold, count, fallback, auto_l, confidence, pos, neg, c_dict, c_base, c_char, c_nsfw, w1, w2, w3, offset, sort, mosaic_auto, mosaic_level, c_dict_enabled, auto_opt, custom_tags, active_prof, polish, smart_neg, auto_file, smart_neg_mode, inventory_mode, limit_base, limit_char, limit_nsfw, c_mosaic):
+def save_all_settings(lang, img_f, memo, threshold, count, fallback, auto_l, confidence, pos, neg, c_dict, c_base, c_char, c_nsfw, w1, w2, w3, offset, mosaic_auto, mosaic_level, c_dict_enabled, auto_opt, custom_tags, active_prof, polish, smart_neg, smart_neg_mode, inventory_mode, limit_base, limit_char, limit_nsfw, c_mosaic, conf_base, conf_char, conf_nsfw, use_global_conf, sort_mode="None", auto_file=False):
     config = load_config()
     config.update({
-        "language": lang,
-        "image_folder": _clean_path(img_f),
-        "memo_file": _clean_path(memo),
-        "match_threshold": threshold,
-        "generation_count": count,
-        "fallback_enabled": fallback,
-        "auto_lora_enabled": auto_l,
-        "gen_confidence": confidence,
-        "gen_positive": pos,
-        "gen_negative": neg,
-        "gen_custom_dict": c_dict,
-        "gen_categories": list(c_base) + list(c_char) + list(c_nsfw),
-        "wildcard_1_path": _clean_path(w1),
-        "wildcard_2_path": _clean_path(w2),
-        "wildcard_3_path": _clean_path(w3),
-        "lora_offset": offset,
-        "output_sort_mode": sort,
-        "gen_mosaic_auto": mosaic_auto,
-        "gen_mosaic_level": mosaic_level,
-        "gen_custom_dict_enabled": c_dict_enabled,
-        "auto_optimize_prompt": auto_opt,
-        "custom_base_tags": custom_tags,
-        "active_profile": active_prof,
-        "prompt_polish": polish,
-        "smart_negative": smart_neg,
-        "smart_negative_mode": smart_neg_mode,
-        "auto_filename": auto_file,
-        "inventory_mode": inventory_mode,
-        "limit_base": limit_base,
-        "limit_char": limit_char,
-        "limit_nsfw": limit_nsfw,
-        "gen_cat_mosaic": list(c_mosaic),
+        "language": lang, "image_folder": _clean_path(img_f), "memo_file": _clean_path(memo),
+        "match_threshold": threshold, "generation_count": count, "fallback_enabled": fallback,
+        "auto_lora_enabled": auto_l, "gen_confidence": confidence, "gen_positive": pos,
+        "gen_negative": neg, "gen_custom_dict": c_dict, "gen_categories": list(c_base) + list(c_char) + list(c_nsfw),
+        "wildcard_1_path": _clean_path(w1), "wildcard_2_path": _clean_path(w2), "wildcard_3_path": _clean_path(w3),
+        "lora_offset": offset, "output_sort_mode": sort_mode, "auto_filename": auto_file, "gen_mosaic_auto": mosaic_auto, "gen_mosaic_level": mosaic_level,
+        "gen_custom_dict_enabled": c_dict_enabled, "auto_optimize_prompt": auto_opt, "custom_base_tags": custom_tags,
+        "active_profile": active_prof, "prompt_polish": polish, "smart_negative": smart_neg,
+        "smart_negative_mode": smart_neg_mode, "inventory_mode": inventory_mode,
+        "limit_base": limit_base, "limit_char": limit_char, "limit_nsfw": limit_nsfw, "gen_cat_mosaic": list(c_mosaic),
+        "gen_conf_base": conf_base, "gen_conf_char": conf_char, "gen_conf_nsfw": conf_nsfw,
+        "use_global_conf": use_global_conf
     })
     save_config(config)
-    return f"✅ {t('msg_all_saved')}"
+    return f"\u2705 {t('msg_all_saved')}"
 
-def append_to_memo(memo_path, entry):
-    if not memo_path or not memo_path.strip():
-        return t("msg_memo_err") + " (Path empty)"
-    if not entry or not entry.strip():
-        return t("msg_memo_err") + " (Entry empty)"
-    try:
-        memo_path = _clean_path(memo_path)
-        dir_path = os.path.dirname(memo_path)
-        if dir_path:
-            os.makedirs(dir_path, exist_ok=True)
-        
-        separator = ""
-        if os.path.isfile(memo_path):
-            with open(memo_path, "r", encoding="utf-8") as f:
-                content = f.read()
-            if content and not content.endswith("\n"):
-                separator = "\n\n"
-            elif content:
-                separator = "\n"
-        
-        with open(memo_path, "a", encoding="utf-8") as f:
-            f.write(separator + entry.strip() + "\n")
-        return t("msg_memo_appended")
-    except Exception as e:
-        return f"{t('msg_memo_err')} {e}"
+def handle_load_preset(name):
+    config = load_config(); presets = config.get("presets", {}); p = presets.get(name)
+    if not p: return (
+        "", "", 0.3, 1,           # image_folder, memo_file, threshold, count
+        True, True,               # fallback, auto_lora
+        0.35, "", "", "",         # confidence, pos, neg, custom_dict
+        "", "", "",               # w1, w2, w3
+        0.0, False, "Med", True,  # lora_offset, mosaic_auto, mosaic_level, custom_dict_enabled
+        False, "", "Standard / SDXL",  # auto_opt, custom_tags, profile
+        False, False, "append",   # polish, smart_neg, sn_mode
+        False, 10, 10, 15,        # inventory_mode, limit_base, limit_char, limit_nsfw
+        [], [], [],               # c_base, c_char, c_nsfw (CheckboxGroup は [] が正しい)
+        0.35, 0.35, 0.35,         # conf_base, conf_char, conf_nsfw
+        True                      # use_global_conf
+    )
+    config["last_preset"] = name; save_config(config)
+    all_cats = p.get("gen_categories", [])
+    from .constants import _CAT_BASE_KEYS, _CAT_CHAR_KEYS, _CAT_NSFW_KEYS, WILD_1_PATH, WILD_2_PATH, WILD_3_PATH
+    c_base = [k for k in all_cats if k in _CAT_BASE_KEYS]
+    c_char = [k for k in all_cats if k in _CAT_CHAR_KEYS]
+    c_nsfw = [k for k in all_cats if k in _CAT_NSFW_KEYS]
+    return (
+        p.get("image_folder", ""), p.get("memo_file", ""), p.get("match_threshold", 0.3), p.get("generation_count", 1),
+        p.get("fallback_enabled", True), p.get("auto_lora_enabled", True),
+        p.get("gen_confidence", 0.35), p.get("gen_positive", ""), p.get("gen_negative", ""),
+        p.get("gen_custom_dict", ""), 
+        p.get("wildcard_1_path", WILD_1_PATH), p.get("wildcard_2_path", WILD_2_PATH), p.get("wildcard_3_path", WILD_3_PATH),
+        p.get("lora_offset", 0.0), p.get("gen_mosaic_auto", False), p.get("gen_mosaic_level", "Med"),
+        p.get("gen_custom_dict_enabled", True),
+        p.get("auto_optimize_prompt", False), p.get("custom_base_tags", ""), p.get("active_profile", "Standard / SDXL"),
+        p.get("prompt_polish", False), p.get("smart_negative", False), p.get("smart_negative_mode", "append"),
+        p.get("inventory_mode", False), p.get("limit_base", 10),
+        p.get("limit_char", 10), p.get("limit_nsfw", 15),
+        c_base, c_char, c_nsfw,
+        p.get("conf_base", 0.35), p.get("conf_char", 0.35), p.get("conf_nsfw", 0.35),
+        p.get("use_global_conf", True)
+    )
 
-def pick_random_assets(en_char, en_sit, en_w1, en_w2, en_w3, inventory_mode=False):
-    """Pick random LoRAs/wildcards from slots."""
-    from .lora_mgr import load_lora_list
-    from .i18n import t
-    
-    results = {
-        "char": None, "sit": None, "w1": None, "w2": None, "w3": None
+def handle_save_preset(name, *args):
+    if not name or not name.strip(): return "Error: Name empty", None
+    config = load_config(); presets = config.get("presets", {})
+    # args: [0:img, 1:memo, 2:thr, 3:cnt, 4:fall, 5:al, 6:g_conf, 7:g_pos, 8:g_neg, 9:g_cust, 10:w1, 11:w2, 12:w3, 13:l_off, 14:m_auto, 15:m_lvl, 16:c_en, 17:a_opt, 18:c_tags, 19:prof, 20:p_pol, 21:s_neg, 22:s_neg_mode, 23:inv_m, 24:l_base, 25:l_char, 26:l_nsfw, 27:c_base, 28:c_char, 29:c_nsfw, 30:conf_b, 31:conf_c, 32:conf_n, 33:ug_conf]
+    presets[name.strip()] = {
+        "image_folder": args[0], "memo_file": args[1], "match_threshold": args[2],
+        "generation_count": args[3], "fallback_enabled": args[4], "auto_lora_enabled": args[5],
+        "gen_confidence": args[6], "gen_positive": args[7], "gen_negative": args[8],
+        "gen_custom_dict": args[9], "wildcard_1_path": args[10], "wildcard_2_path": args[11],
+        "wildcard_3_path": args[12], "lora_offset": args[13], "gen_mosaic_auto": args[14],
+        "gen_mosaic_level": args[15], "gen_custom_dict_enabled": args[16],
+        "auto_optimize_prompt": args[17], "custom_base_tags": args[18], "active_profile": args[19],
+        "prompt_polish": args[20], "smart_negative": args[21], "smart_negative_mode": args[22],
+        "inventory_mode": args[23], "limit_base": args[24], "limit_char": args[25],
+        "limit_nsfw": args[26], "gen_categories": list(args[27]) + list(args[28]) + list(args[29]),
+        "conf_base": args[30], "conf_char": args[31], "conf_nsfw": args[32], "use_global_conf": args[33]
     }
-    
-    def _pick(label, key):
-        content = load_lora_list(label)
-        items = [line.strip() for line in content.splitlines() if line.strip() and not line.strip().startswith("#")]
-        if not items: return None
-        if inventory_mode:
-            return get_inventory_weighted_choice(items, f"slot_{key}")
-        return random.choice(items)
+    config["presets"] = presets; config["last_preset"] = name.strip(); save_config(config)
+    import gradio as gr
+    return f"\u2705 Saved: {name}", gr.update(choices=["Default"] + list(presets.keys()))
 
-    if en_char: results["char"] = _pick(t("lora_type_char"), "char")
-    if en_sit:  results["sit"]  = _pick(t("lora_type_sit"), "sit")
-    if en_w1:   results["w1"]   = _pick(t("wildcard_1"), "w1")
-    if en_w2:   results["w2"]   = _pick(t("wildcard_2"), "w2")
-    if en_w3:   results["w3"]   = _pick(t("wildcard_3"), "w3")
-    
+def handle_delete_preset(name):
+    if not name or name == "Default": return "Cannot delete Default", None
+    config = load_config(); presets = config.get("presets", {})
+    if name in presets: del presets[name]
+    config["presets"] = presets; save_config(config)
+    import gradio as gr
+    return f"\U0001f5d1\ufe0f Deleted: {name}", gr.update(choices=["Default"] + list(presets.keys()))
+
 def get_inventory_status():
     inventory = load_inventory()
-    if not inventory:
-        return t("msg_no_tags_err")
-    
+    if not inventory: return t("msg_no_tags_err")
     lines = []
     for cat, items in inventory.items():
         lines.append(f"### {cat}")
         sorted_items = sorted(items.items(), key=lambda x: x[1], reverse=True)
-        for item, count in sorted_items:
-            lines.append(f"- {item}: {count}")
+        for item, count in sorted_items: lines.append(f"- {item}: {count}")
     return "\n".join(lines)
 
 def reset_inventory_global():
@@ -345,3 +255,28 @@ def reset_inventory_lora():
     new_inventory = {k: v for k, v in inventory.items() if not k.startswith("lora_") and not k.startswith("slot_")}
     save_inventory(new_inventory)
     return t("msg_inventory_reset")
+
+def append_to_memo(memo_path, entry):
+    if not memo_path or not entry: return t("msg_memo_err")
+    try:
+        memo_path = _clean_path(memo_path)
+        dir_path = os.path.dirname(memo_path)
+        if dir_path:
+            os.makedirs(dir_path, exist_ok=True)
+        with open(memo_path, "a", encoding="utf-8") as f: f.write("\n\n" + entry.strip() + "\n")
+        return t("msg_memo_appended")
+    except Exception as e: return f"Error: {e}"
+
+def pick_random_assets(en_char, en_sit, en_w1, en_w2, en_w3, inventory_mode=False):
+    from .lora_mgr import load_lora_list
+    res = {"char": None, "sit": None, "w1": None, "w2": None, "w3": None}
+    def _p(l, k):
+        items = [i.strip() for i in load_lora_list(l).splitlines() if i.strip() and not i.strip().startswith('#')]
+        if not items: return None
+        return get_inventory_weighted_choice(items, k) if inventory_mode else random.choice(items)
+    if en_char: res["char"] = _p(t("lora_type_char"), "slot_char")
+    if en_sit: res["sit"] = _p(t("lora_type_sit"), "slot_sit")
+    if en_w1: res["w1"] = _p(t("wildcard_1"), "slot_w1")
+    if en_w2: res["w2"] = _p(t("wildcard_2"), "slot_w2")
+    if en_w3: res["w3"] = _p(t("wildcard_3"), "slot_w3")
+    return res

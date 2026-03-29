@@ -4,586 +4,260 @@ import json
 from .constants import CONFIG_PATH
 
 _I18N = {
-    # --- img2img アコーディオン ---
-    "accordion_desc": {
-        "en": "**Check Enable → Click Generate.** (Tip: If using external wildcards in the main box, turn OFF 'Overwrite Prompt' below).",
-        "ja": "**有効化 → Generate で自動実行。** (Tip: 外部のワイルドカード等と併用する場合は下の「プロンプトを上書き」をOFFにしてください)。",
+    "tab_header": {"en": "Smart Img2Img Composer Settings", "ja": "スマート・img2imgコンポーザー 設定"},
+    "tab_settings": {"en": "⚙️ Settings & Preview", "ja": "⚙️ 設定 & プレビュー"},
+    "h_settings": {"en": "⚙️ Global Settings", "ja": "⚙️ 全般設定"},
+    "h_preview": {"en": "👀 Generation Preview", "ja": "👀 生成プレビュー"},
+    "language_label": {"en": "UI Language", "ja": "表示言語"},
+    "image_folder": {"en": "Reference Image Folder", "ja": "参照画像フォルダ"},
+    "memo_file": {"en": "Memo File (.txt)", "ja": "メモファイル (.txt)"},
+    "match_threshold": {"en": "Match Threshold", "ja": "ファイル名一致しきい値"},
+    "generation_count": {"en": "Batch Count", "ja": "生成枚数"},
+    "lora_offset": {"en": "LoRA Offset", "ja": "LoRA 強度オフセット"},
+    "btn_save": {"en": "💾 Save All Settings", "ja": "💾 全ての設定を保存"},
+    "btn_preview": {"en": "🔎 Test Composition", "ja": "🔎 構成テスト"},
+    "positive_prompt": {"en": "Positive Prompt", "ja": "生成ポジティブ"},
+    "negative_prompt": {"en": "Negative Prompt", "ja": "生成ネガティブ"},
+    "log": {"en": "Log", "ja": "ログ"},
+    "tab_prompt_gen": {"en": "🏷️Auto-Prompt Gen", "ja": "🏷️タグ解析＋メモ生成"},
+    "tab_lora_manager": {"en": "📦Asset Lists", "ja": "📦アセットリスト管理"},
+    "tab_inventory": {"en": "⚖️ Inventory Control", "ja": "⚖️ 在庫管理"},
+    "tab_usage": {"en": "📖 Manual", "ja": "📖 使い方"},
+    "selected_image": {"en": "Selected Image", "ja": "選択された画像"},
+    
+    # Preset
+    "preset_label": {"en": "Load Preset", "ja": "プリセット一覧"},
+    "preset_ph": {"en": "New Preset Name", "ja": "新しいプリセット名"},
+    
+    # Logic Settings
+    "auto_optimize_prompt": {"en": "✨ Auto-Optimize Prompt", "ja": "✨ プロンプト自動最適化"},
+    "prompt_polish": {"en": "🪄 Prompt Polish", "ja": "🪄 プロンプト洗練"},
+    "active_profile": {"en": "🎨 Profile", "ja": "🎨 最適化プロファイル"},
+    "custom_base_tags": {"en": "Base Tags", "ja": "基本タグ"},
+    "smart_negative": {"en": "🚫 Smart Negative", "ja": "🚫 ネガティブ補強"},
+    "sn_mode_add": {"en": "Append", "ja": "追加"},
+    "sn_mode_overwrite": {"en": "Overwrite", "ja": "上書き"},
+    "smart_negative_mode": {"en": "Mode", "ja": "ネガティブ挿入モード"},
+    "auto_lora_enabled":        {"en": "Auto LoRA Apply",          "ja": "LoRA 自動適用"},
+    "preview_output":            {"en": "Preview Output",            "ja": "プレビュー出力"},
+    "fallback_enabled": {"en": "Fallback Section", "ja": "一致しない場合は [default] セクションを使用"},
+    "output_settings": {"en": "Output Management", "ja": "出力設定"},
+    "sort_mode": {"en": "Sort Subfolders", "ja": "サブフォルダ分け"},
+    "sort_none": {"en": "None", "ja": "なし"},
+    "sort_preset": {"en": "By Preset", "ja": "プリセット別"},
+    "sort_section": {"en": "By Section", "ja": "セクション別"},
+    "sort_date": {"en": "By Date", "ja": "日付別"},
+    "auto_filename": {"en": "🏷️ Auto-Filename", "ja": "🏷️ 自動命名"},
+    
+    # Tab 2: Gen
+    "prompt_gen_desc": {"en": "Analyze images and create memo entries.", "ja": "画像を解析してメモ用のエントリを自動生成します。"},
+    "target_image": {"en": "Target Image", "ja": "📸 解析する画像"},
+    "section_name": {"en": "Section Name", "ja": "📌 セクション名 (Memo Key)"},
+    "section_ph": {"en": "e.g. Character A", "ja": "例: タイトル1"},
+    "section_info": {"en": "Matches image filename in img2img.", "ja": "img2img 生成時のファイル名一致に使用します。"},
+    "h_extracted_tags": {"en": "Extracted Tags (Current)", "ja": "抽出タグ"},
+    "gen_tags_only": {"en": "Tags Only Mode", "ja": "タグのみ出力"},
+    "gen_tags_only_info": {"en": "Do not compose with template.", "ja": "メモテンプレートを使わず、タグのみを出力します。"},
+    "btn_gen_tags": {"en": "🏷️ Generate Tags", "ja": "🏷️ タグ解析＆生成"},
+    "h_categories": {"en": "Categories (Extract checked types)", "ja": "🏷️ 抽出するタグの種類（チェックした種類のタグだけを抽出します）"},
+    "btn_toggle_cat_all": {"en": "🔄 Select/Deselect All", "ja": "🔄 全選択/解除"},
+    "cat_base": {"en": "Base Categories", "ja": "基本カテゴリ (構図・背景など)"},
+    "cat_char": {"en": "Character Categories", "ja": "人物・詳細カテゴリ (髪型・服装・性別など)"},
+    "cat_nsfw": {"en": "NSFW Categories", "ja": "特殊・NSFWカテゴリ (行為・局部・アイテム等)"},
+    
+    # Detailed Categories
+    "cat_composition": {"en": "Composition", "ja": "構図・画角"},
+    "cat_pose": {"en": "Pose / Action", "ja": "ポーズ・動作"},
+    "cat_background": {"en": "Background", "ja": "背景・場所"},
+    "cat_nature": {"en": "Nature / Environment", "ja": "自然・環境"},
+    "cat_lighting": {"en": "Lighting", "ja": "照明・ライティング"},
+    "cat_atmosphere": {"en": "Atmosphere / Mood", "ja": "雰囲気・ムード"},
+    "cat_meta": {"en": "Meta / Quality", "ja": "品質・メタタグ"},
+    "cat_char_base": {"en": "Body Type", "ja": "体型・ボディ"},
+    "cat_char_hair": {"en": "Hair Style", "ja": "髪型・ヘア"},
+    "cat_char_eyes": {"en": "Eyes", "ja": "瞳・目元"},
+    "cat_char_face": {"en": "Face / Expression", "ja": "顔・表情"},
+    "cat_char_clothes": {"en": "Outfits", "ja": "服装・衣装"},
+    "cat_char_male": {"en": "Male Specific", "ja": "男性要素"},
+
+    "cat_nsfw_action": {"en": "Sex Actions", "ja": "性行為内容"},
+    "cat_nsfw_creature": {"en": "Creatures", "ja": "人外・触手等"},
+    "cat_nsfw_item": {"en": "Toys / Items", "ja": "道具・アイテム"},
+    "cat_nsfw_focus": {"en": "Body Part Focus", "ja": "部位フォーカス"},
+    "cat_nsfw_fluids": {"en": "Body Fluids", "ja": "体液・汁"},
+    "cat_nsfw_fetish": {"en": "Fetish / Kink", "ja": "フェティッシュ"},
+    "cat_nsfw_clothes_mess": {"en": "Undressing", "ja": "着衣乱れ・露出"},
+    "cat_nsfw_genitals": {"en": "Genitals", "ja": "局部・性器"},
+    "cat_nsfw_scenario": {"en": "Scenarios", "ja": "シチュエーション・特殊"},
+    "btn_toggle_cat": {"en": "Select All / Deselect All", "ja": "全選択 / 解除"},
+    
+    "h_tag_analysis_settings": {"en": "⚙️ Tag Analysis Settings", "ja": "⚙️ タグ解析・設定"},
+    "conf_base": {"en": "Base Group (BG, etc.)", "ja": "基本グループ (背景等)"},
+    "conf_char": {"en": "Character Group (Face, Clothes)", "ja": "人物グループ (顔・服)"},
+    "conf_nsfw": {"en": "NSFW Group (Genitals, Actions)", "ja": "NSFWグループ (局部・行為)"},
+    "conf_total": {"en": "Tag Confidence (Total)", "ja": "タグ信頼性 (共通)"},
+    
+    "gen_custom_dict_enabled_label": {"en": "Enable Custom Dictionary", "ja": "カスタム読替え辞書を有効にする"},
+    "h_mosaic_settings": {"en": "🧱 Mosaic Auto-Prompt Settings", "ja": "🧱 モザイクプロンプト自動付与設定"},
+    "gen_mosaic_auto": {"en": "Auto Detect", "ja": "自動検知"},
+    "gen_mosaic_level": {"en": "Level", "ja": "モザイクの濃さ"},
+    "mosaic_layer_1": {"en": "Mosaic Layer 1", "ja": "モザイク一層目"},
+    "mosaic_low": {"en": "Thin", "ja": "薄い"},
+    "mosaic_med": {"en": "Med", "ja": "普通"},
+    "mosaic_high": {"en": "Thick", "ja": "厚い"},
+    "cat_nsfw_mosaic": {"en": "Categories", "ja": "検知タイプ"},
+    "h_pickup_limits": {"en": "Pickup Limits", "ja": "📏 抽出本数上限"},
+    "limit_base_label": {"en": "Base", "ja": "基本グループ（背景等）"},
+    "limit_char_label": {"en": "Char", "ja": "人物グループ（顔・服）"},
+    "limit_nsfw_label": {"en": "NSFW", "ja": "NSFWグループ（局部・行為）"},
+    "default_positive": {"en": "Positive Template", "ja": "✨ デフォルトポジティブ"},
+    "default_negative": {"en": "Negative Template", "ja": "🚫 デフォルトネガティブ"},
+    "custom_dict": {"en": "Custom Dictionary", "ja": "カスタム読替え辞書"},
+    "generated_entry": {"en": "📋 Generated Entry (editable)", "ja": "📋 生成されたエントリ（編集可能）"},
+    "generated_entry_info": {"en": "Paste this to memo file.", "ja": "これをメモファイルに貼り付けてください。"},
+    "btn_append_memo": {"en": "📝 Append to Memo", "ja": "📝 メモファイルに追記"},
+    "btn_send_img2img": {"en": "🚀 img2img Transfer", "ja": "🚀 img2imgへ送信"},
+    "analysis_log": {"en": "Analysis Log", "ja": "解析ログ"},
+    "btn_save_settings": {"en": "💾 Save Settings", "ja": "💾 設定を保存"},
+    "append_status": {"en": "Append Status", "ja": "追記ステータス"},
+    
+    # Tab 3: LoRA
+    "lora_manager_desc": {"en": "Manage asset lists.", "ja": "ランダムアセットのリストを管理します。"},
+    "lora_type": {"en": "Target Slot", "ja": "対象スロット"},
+    "lora_type_char": {"en": "Char LoRA", "ja": "キャラ LoRA"},
+    "lora_type_sit": {"en": "Sit LoRA", "ja": "シチュ LoRA"},
+    "wildcard_1": {"en": "W1", "ja": "ワイルド1"},
+    "wildcard_2": {"en": "W2", "ja": "ワイルド2"},
+    "wildcard_3": {"en": "W3", "ja": "ワイルド3"},
+    "lora_list_label": {"en": "List Content", "ja": "リスト内容"},
+    "lora_mgr_placeholder": {"en": "Enter items...", "ja": "1行ごとに入力してください。"},
+    "btn_save_lora_list": {"en": "Save List", "ja": "リストを保存"},
+    "lora_input_label": {"en": "Quick Add", "ja": "クイック追加"},
+    "btn_append_lora": {"en": "Add", "ja": "追加"},
+    
+    # Tab 4: Inventory
+    "inventory_desc": {"en": "Manage usage statistics.", "ja": "アセットの使用回数を管理します。"},
+    "inventory_mode": {"en": "Enable Inventory Logic", "ja": "在庫管理ロジックを有効にする"},
+    "inventory_mode_info": {"en": "Prioritizes lower usage items.", "ja": "使用回数が少ない項目を優先します。"},
+    "btn_check_stock": {"en": "View Stats", "ja": "使用統計を表示"},
+    "btn_lora_reset": {"en": "Reset Usage", "ja": "使用履歴リセット"},
+    "btn_global_reset": {"en": "Reset All", "ja": "全データリセット"},
+    "inventory_status_label": {"en": "Status", "ja": "ステータス"},
+    
+    # Manual
+    "usage_md": {
+        "en": """
+### 🎲 How to Use Smart Img2Img Composer v1.1.2
+
+This extension is a powerful tool to synchronize your image metadata with your prompt generation workflow.
+
+#### 1. ⚙️ Settings & Preview
+- **Reference Image Folder**: The directory where your source images are stored.
+- **Memo File**: A .txt file containing prompt entries for each image name.
+- **Health Check (✅/❌)**: Real-time validation of your paths.
+- **Preset Management**: Save and load different configurations easily.
+
+#### 2. 🏷️ Tag Analysis (Tagger)
+- **Auto-Prompt Gen**: Uses deep learning to analyze your uploaded image and generate tags.
+- **Category Sliders**: Fine-tune confidence thresholds for different types of tags.
+- **Mosaic Auto-Prompt**: Automatically adds NSFW/Mosaic-safe tags based on visual analysis.
+
+#### 3. 📦 Asset Lists (LoRA/Wildcards)
+- Manage your LoRA and Wildcard lists globally. These are used when 'Inventory Logic' is enabled.
+
+#### 4. ⚖️ Inventory Logic
+- Prevents repetition by tracking which assets have been used and prioritizing unused ones.
+
+---
+*Created by Antigravity Team*
+        """,
+        "ja": """
+### 🎲 Smart Img2Img Composer v1.1.2 マニュアル
+
+本拡張機能は、参照画像のファイル名とメモファイルを紐付け、複雑な img2img 構成を自動化するプロフェッショナルツールです。
+
+#### 1. ⚙️ 設定 & プレビュー (基本操作)
+- **参照画像フォルダ**: img2img で読み込む画像の保存先を指定します。
+- **メモファイル**: ファイル名に基づいたプロンプト（LoRAやタグ）を記述した .txt ファイルです。
+- **ヘルスチェック (✅/❌)**: パスが正しいかリアルタイムで判定します。
+- **プリセット**: 「SDXL用」「Pony用」など、設定をまるごと保存・読込できます。
+
+#### 2. 🏷️ タグ解析＋メモ生成 (Tagger)
+- **タグ抽出**: アップロードした画像をAIが解析し、全自動でプロンプトを生成します。
+- **カテゴリ別信頼性**: 背景、衣装、行為などのグループごとに抽出の厳しさを調整可能。
+- **モザイク自動付与**: 画像からモザイク属性を検知し、適切なタグを自動挿入します。
+
+#### 3. 📦 アセットリスト管理
+- ランダムに使用する LoRA やワイルドカードのリストを一括管理できます。
+
+#### 4. ⚖️ 在庫管理 (Inventory Logic)
+- **使用回数カウント**: 同じ LoRA ばかりが出ないよう、使用回数が少ない順に優先して抽選します。
+
+---
+*Developed by Antigravity*
+        """
     },
-    "enable": {
-        "en": "✅ Enable (Auto-inject image & prompt)",
-        "ja": "✅ 有効化（生成時に自動で画像＋プロンプト投入）",
-    },
-    "pos_label": {"en": "Pos", "ja": "位置"},
+    
+    # msgs
+    "msg_all_saved": {"en": "Saved", "ja": "保存しました"},
+    "msg_inventory_reset": {"en": "Reset done", "ja": "リセット完了"},
+    "msg_memo_appended": {"en": "Appended", "ja": "追記完了"},
+    "msg_memo_err": {"en": "Error", "ja": "エラー"},
+    "msg_lora_saved": {"en": "List saved", "ja": "リストを保存しました"},
+    "no_images": {"en": "No images", "ja": "画像なし"},
+    "log_no_sections": {"en": "No sections", "ja": "セクションなし"},
+    "log_no_match": {"en": "No match", "ja": "一致なし"},
+    "msg_tagger_not_found": {"en": "Tagger missing", "ja": "タガーが見つかりません"},
+    "msg_tag_fetch_err": {"en": "Tag error", "ja": "タグ解析エラー"},
+    "msg_no_upload_err": {"en": "Upload first", "ja": "画像をアップロードしてください"},
+    "msg_no_section_err": {"en": "Name section", "ja": "セクション名を入力してください"},
+    "log_all_tags": {"en": "{count} tags found", "ja": "{count} 個のタグを検出"},
+    "log_filtered_tags": {"en": "{count} tags picked", "ja": "{count} 個のタグを抽出"},
+    "log_custom_match": {"en": "Rule hit: {cond} -> {prompt}", "ja": "カスタムルール一致: {cond} -> {prompt}"},
+
+    # --- 欠損していたキー群の追加 ---
+    "pos_label": {"en": "Injection Position", "ja": "挿入位置"},
+    "resize_slider": {"en": "Slider Value", "ja": "スライダー値"},
+
+    "accordion_desc": {"en": "Description", "ja": "説明"},
+    "enable": {"en": "Enable", "ja": "有効化"},
+    "accordion_assets": {"en": "Assets", "ja": "アセット"},
     "pos_front": {"en": "Front", "ja": "前"},
     "pos_back": {"en": "Back", "ja": "後"},
-    "pos_smart": {"en": "Smart", "ja": "特定タグの後"},
-    "wildcard_1": {"en": "Wildcard 1", "ja": "ワイルドカード1"},
-    "wildcard_2": {"en": "Wildcard 2", "ja": "ワイルドカード2"},
-    "wildcard_3": {"en": "Wildcard 3", "ja": "ワイルドカード3"},
-    "accordion_assets": {"en": "🎲 Random Asset Slots", "ja": "🎲 ランダムアセット・スロット"},
-    "tab_settings_wildcards": {"en": "📂 Custom Wildcard Paths", "ja": "📂 カスタム・ワイルドカードのパス設定"},
-    "wildcard_path_label": {"en": "Path to {name}", "ja": "{name}のパス"},
-    "selection_mode": {
-        "en": "🖼️ Image Selection Mode",
-        "ja": "🖼️ 画像の選択モード",
-    },
-    "sel_random": {
-        "en": "Random",
-        "ja": "ランダムに選ぶ",
-    },
-    "sel_sequential": {
-        "en": "Sequential (One by one in alphabetical order)",
-        "ja": "フォルダ内の順番通りに1枚ずつ選ぶ",
-    },
-    "overwrite_prompt": {
-        "en": "Overwrite Prompt (If OFF, append to existing)",
-        "ja": "プロンプトを上書き（OFFなら既存の末尾に追加）",
-    },
-    "auto_optimize_prompt": {
-        "en": "✨ Auto-Optimize Prompt Order",
-        "ja": "✨ プロンプトの並びを自動最適化する",
-    },
-    "prompt_polish": {
-        "en": "🪄 Prompt Polish",
-        "ja": "🪄 プロンプトの洗練",
-    },
-    "auto_filename": {
-        "en": "🏷️ Auto-Filename (AI Naming)",
-        "ja": "🏷️ AI 命名 (ファイル名自動生成)",
-    },
-    "auto_filename_info": {
-        "en": "Extract characteristic tags and use them for subfolder/filename organization.",
-        "ja": "特徴的なタグを抽出し、フォルダ名やファイル名に組み込んで整理しやすくします。",
-    },
-    "smart_negative": {
-        "en": "🚫 Smart Negative",
-        "ja": "🚫 スマート・ネガティブ",
-    },
-    "smart_negative_info": {
-        "en": "Automatically apply the best negative prompt for the selected profile (Synced with 🎨 Optimization Profile).",
-        "ja": "選択したプロファイルに最適なネガティブプロンプトを自動適用します（🎨 最適化プロファイルと同期）。",
-    },
-    "custom_base_tags": {
-        "en": "🏷️ Custom Base Tags (Smart Placement)",
-        "ja": "🏷️ 「特定タグの後」で参照するタグ",
-    },
-    "custom_base_tags_info": {
-        "en": "Comma-separated. Smart placement will insert after the last of these tags found in prompt.",
-        "ja": "カンマ区切り。プロンプト内でこれらが見つかった「最後」の地点に挿入します。",
-    },
-    "active_profile": {
-        "en": "🎨 Optimization Profile",
-        "ja": "🎨 最適化プロファイル",
-    },
-    "active_profile_info": {
-        "en": "Switch tag priorities based on the target model. Used by '✨ Auto-Optimize Prompt Order'.",
-        "ja": "使用するモデルに合わせてプロンプトの優先順序を切り替えます。'✨ プロンプトの並びを自動最適化する' にて使用します。",
-    },
-    "btn_apply_profile": {
-        "en": "Apply Profile Settings",
-        "ja": "プロファイルを適用",
-    },
-    "resize_mode": {
-        "en": "📐 Auto-Resize Mode",
-        "ja": "📐 画像サイズ自動調整モード",
-    },
-    "resize_none": {
-        "en": "Do not resize (Use WebUI size)",
-        "ja": "変更しない (WebUIのサイズを使用)",
-    },
-    "resize_slider": {
-        "en": "▼ Force long edge to slider value",
-        "ja": "▼ スライダー設定値に長辺を強制する",
-    },
-    "resize_512": {
-        "en": "▼ Smart Resize: 512~1024 (SD1.5)",
-        "ja": "▼ 元サイズ維持: 512〜1024 の範囲に収める (SD1.5)",
-    },
-    "resize_1024": {
-        "en": "▼ Smart Resize: 1024~1536 (SDXL)",
-        "ja": "▼ 元サイズ維持: 1024〜1536 の範囲に収める (SDXL)",
-    },
-    "resize_1536": {
-        "en": "▼ Smart Resize: 1536~1792 (High-Res)",
-        "ja": "▼ 元サイズ維持: 1536〜1792 の範囲に収める (高画質)",
-    },
-    "base_resolution": {
-        "en": "📏 Base Resolution (Only valid for 'Force long edge')",
-        "ja": "📏 ベース解像度（「長辺を強制する」モード時のみ有効）",
-    },
-    "tab_header": {
-        "en": "Random image → Auto-fetch prompts → Feed to img2img",
-        "ja": "ランダム画像 → プロンプト自動取得 → img2img へ投入",
-    },
-    "tab_settings": {
-        "en": "⚙️ Settings & Preview",
-        "ja": "⚙️ 設定 & プレビュー",
-    },
-    "h_settings": {
-        "en": "### ⚙️ Settings",
-        "ja": "### ⚙️ 設定",
-    },
-    "image_folder": {
-        "en": "📁 Image Folder",
-        "ja": "📁 画像フォルダ",
-    },
-    "image_folder_ph": {
-        "en": "ex: C:/images/input",
-        "ja": "例: C:/images/input",
-    },
-    "memo_file": {
-        "en": "📄 Memo File",
-        "ja": "📄 メモファイル",
-    },
-    "memo_file_ph": {
-        "en": "ex: C:/images/memo.txt",
-        "ja": "例: C:/images/memo.txt",
-    },
-    "match_threshold": {
-        "en": "🎯 Match Threshold (0.0=Exact, 0.4=Loose)",
-        "ja": "🎯 一致率 (0.0=完全一致, 0.4=あいまい)",
-    },
-    "lora_manager_desc": {
-        "en": "Manage lists for random prompts or LoRAs. Each line is picked randomly.",
-        "ja": "ランダムに選ばれるプロンプトやLoRAのリストを管理します。1行につき1項目がランダムに選ばれます。"
-    },
-    "generation_count": {
-        "en": "🔄 Generation Count (Internal Batch)",
-        "ja": "🔄 生成回数",
-    },
-    "fallback_enabled": {
-        "en": "☑ Fallback Enabled (Use [default] if not matched)",
-        "ja": "☑ フォールバック有効 (該当なしで[default]を使用)",
-    },
-    "auto_lora": {
-        "en": "☑ Auto LoRA Injection Enabled",
-        "ja": "☑ auto LoRA injection 有効",
-    },
-    "btn_save": {
-        "en": "💾 Save Settings (Global)",
-        "ja": "💾 グローバル設定を保存",
-    },
-    "btn_save_settings": {
-        "en": "💾 Save Settings",
-        "ja": "💾 設定を保存",
-    },
-    "btn_save_preset": {
-        "en": "💾 Save Preset",
-        "ja": "💾 プリセットを保存",
-    },
-    "btn_delete_preset": {
-        "en": "🗑️ Delete",
-        "ja": "🗑️ 削除",
-    },
-    "preset_label": {
-        "en": "📦 Presets",
-        "ja": "📦 プリセット",
-    },
-    "preset_ph": {
-        "en": "New preset name",
-        "ja": "新規プリセット名",
-    },
-    "lora_offset": {
-        "en": "⚖️ Global LoRA Weight Offset",
-        "ja": "⚖️ LoRA一括ウェイト微調整",
-    },
-    "btn_preview": {
-        "en": "👁️ Preview",
-        "ja": "👁️ プレビュー",
-    },
-    "status": {
-        "en": "Status",
-        "ja": "ステータス",
-    },
-    "h_preview": {
-        "en": "### 👁️ Preview Results",
-        "ja": "### 👁️ プレビュー結果",
-    },
-    "selected_image": {
-        "en": "Selected Image",
-        "ja": "選択画像",
-    },
-    "positive_prompt": {
-        "en": "📝 Positive Prompt",
-        "ja": "📝 Positive",
-    },
-    "negative_prompt": {
-        "en": "🚫 Negative Prompt",
-        "ja": "🚫 Negative",
-    },
-    "log": {
-        "en": "Log",
-        "ja": "ログ",
-    },
-    "tab_prompt_gen": {
-        "en": "🏷️ Auto-Prompt Gen",
-        "ja": "🏷️ プロンプト自動生成",
-    },
-    "prompt_gen_desc": {
-        "en": "### 🏷️ Auto generate prompts with WD14 Tagger\nUpload image → Extract tags by categories below → Append to memo file",
-        "ja": "### 🏷️ WD14 Tagger で自動プロンプト生成\n画像をアップロード → 選択したカテゴリのタグを抽出 → メモファイルに追記",
-    },
-    "h_mosaic_settings": {
-        "en": "🧱 Mosaic Auto-Prompt Settings",
-        "ja": "🧱 モザイクプロンプト自動付与設定",
-    },
-    "btn_toggle_cat": {
-        "en": "Select All / Deselect All",
-        "ja": "全選択 / 解除",
-    },
-    "btn_deselect_all": {
-        "en": "❌ Deselect All Categories",
-        "ja": "❌ 全カテゴリ選択解除",
-    },
-    "btn_toggle_all": {
-        "en": "🔄 Select/Deselect All",
-        "ja": "🔄 全選択/解除",
-    },
-    "btn_toggle_all_cats": {
-        "en": "🔄 Toggle All Categories",
-        "ja": "🔄 全カテゴリ 選択/解除",
-    },
-    "h_extracted_tags": {
-        "en": "🏷️ Extracted Tags Only Display",
-        "ja": "🏷️ 抽出されたタグのみ表示",
-    },
-    "gen_custom_dict_enabled": {
-        "en": "Enable Custom Prompt Rules",
-        "ja": "条件付与ルールを有効にする",
-    },
-    "h_pickup_limits": {
-        "en": "📏 Tag Pickup Limits",
-        "ja": "📏 タグ取得上限設定",
-    },
-    "limit_base_label": {
-        "en": "🖼️ Base Group (Composition, BG, etc.)",
-        "ja": "🖼️ 基本グループ (構図・背景等)",
-    },
-    "limit_char_label": {
-        "en": "👩 Character Group (Hair, Clothes, etc.)",
-        "ja": "👩 人物グループ (髪・服・体等)",
-    },
-    "limit_nsfw_label": {
-        "en": "🔞 NSFW Group (Actions, Items, etc.)",
-        "ja": "🔞 NSFWグループ (行為・属性等)",
-    },
-    "gen_tags_only": {
-        "en": "🏷️ Generated Tags Only",
-        "ja": "🏷️ 生成されたタグのみ",
-    },
-    "gen_tags_only_info": {
-        "en": "Comma-separated tags (Easy to copy)",
-        "ja": "カンマ区切りのタグのみ（コピー用）",
-    },
-    "target_image": {
-        "en": "📸 Target Image",
-        "ja": "📸 解析する画像",
-    },
-    "section_name": {
-        "en": "📌 Section Name",
-        "ja": "📌 セクション名",
-    },
-    "section_ph": {
-        "en": "ex: title1",
-        "ja": "例: タイトル1",
-    },
-    "section_info": {
-        "en": "Becomes [section_name] in memo file",
-        "ja": "メモファイルの [セクション名] になる",
-    },
-    "h_categories": {
-        "en": "### 🏷️ Target Categories (Only checked types extracted)",
-        "ja": "### 🏷️ 抽出するタグの種類（チェックした種類のタグだけを抽出します）",
-    },
-    "cat_base": {
-        "en": "🖼️ Base (Composition, Backgrounds)",
-        "ja": "🖼️ 基本カテゴリ (構図・背景など)",
-    },
-    "cat_char": {
-        "en": "👩 Character Detail (Hair, Clothes)",
-        "ja": "👩 人物・詳細カテゴリ (髪型・服装など)",
-    },
-    "cat_nsfw": {
-        "en": "🔞 NSFW & Fetish (Actions, Genitals, Items)",
-        "ja": "🔞 特殊・NSFWカテゴリ (行為・局部・アイテム等)",
-    },
-    "confidence": {
-        "en": "🎯 Tag Confidence Threshold",
-        "ja": "🎯 タグ信頼度しきい値",
-    },
-    "confidence_info": {
-        "en": "Lower = more tags",
-        "ja": "低いほど多くのタグが含まれる",
-    },
-    "default_positive": {
-        "en": "✨ Default Positive",
-        "ja": "✨ デフォルトポジティブ",
-    },
-    "default_positive_info": {
-        "en": "Prepended to output",
-        "ja": "抽出されたタグの先頭に自動で付与されるベースプロンプト",
-    },
-    "custom_dict": {
-        "en": "📚 Custom Dictionary",
-        "ja": "📚 好みのプロンプト置き場（条件付与）",
-    },
-    "custom_dict_info": {
-        "en": "Format: `condition tag > prompt to add` (Added only if condition matched in image)",
-        "ja": "「条件タグ > 追加したいプロンプト」の形式で記述 (複数行可)。画像から条件タグが出た時のみ追加されます。",
-    },
-    "gen_mosaic_auto": {
-        "en": "🧱 Mosaic Auto-Prompt",
-        "ja": "🧱 モザイク用プロンプトを自動付与",
-    },
-    "gen_mosaic_level": {
-        "en": "🧱 Mosaic Level",
-        "ja": "🧱 モザイクの強度",
-    },
-    "mosaic_low": {"en": "Low", "ja": "薄い"},
-    "mosaic_med": {"en": "Med", "ja": "普通"},
-    "mosaic_high": {"en": "High", "ja": "厚い"},
-    "cat_composition": {"en": "Composition & Camera", "ja": "構図・カメラ"},
-    "cat_pose": {"en": "Pose & Action", "ja": "ポーズ・アクション"},
-    "cat_background": {"en": "Background & Scene", "ja": "背景・場所"},
-    "cat_nature": {"en": "Nature & Weather", "ja": "自然・天候"},
-    "cat_lighting": {"en": "Lighting", "ja": "照明"},
-    "cat_atmosphere": {"en": "Atmosphere", "ja": "雰囲気"},
-    "cat_meta": {"en": "Meta Tags", "ja": "メタタグ"},
-    "cat_char_base": {"en": "👤 Character Body & Traits", "ja": "👤 身体・基本特徴"},
-    "cat_char_hair": {"en": "💇 Hair Style & Color", "ja": "💇 髪型・髪色"},
-    "cat_char_eyes": {"en": "👀 Eyes & Makeup", "ja": "👀 目・メイク"},
-    "cat_char_face": {"en": "🎈 Expression", "ja": "🎈 表情"},
-    "cat_char_clothes": {"en": "👗 Clothes & Accessories", "ja": "👗 服装・装飾品"},
-    "cat_char_male": {"en": "♂️ Male Character", "ja": "♂️ 男性キャラクター"},
-    "cat_nsfw_action": {"en": "🎭 Actions", "ja": "🎭 行為・アクション"},
-    "cat_nsfw_creature": {"en": "🦑 Creatures", "ja": "🦑 クリーチャー・追加キャラ"},
-    "cat_nsfw_item": {"en": "🧸 Toys & Items", "ja": "🧸 アイテム・玩具"},
-    "cat_nsfw_focus": {"en": "🔞 Focus & Angles", "ja": "🔞 特殊構図・フォーカス"},
-    "cat_nsfw_fluids": {"en": "💦 Fluids & Mess", "ja": "💦 体液・汚れ系"},
-    "cat_nsfw_fetish": {"en": "🥵 Fetish States", "ja": "🥵 表情・フェティッシュ状態"},
-    "cat_nsfw_clothes_mess": {"en": "👗 Clothes Mess", "ja": "👗 衣服の乱れ・着脱"},
-    "cat_nsfw_genitals": {"en": "🍑 Genitals", "ja": "🍑 局部・デリケートゾーン"},
-    "cat_nsfw_mosaic": {"en": "🧱 Mosaic & Censor", "ja": "🧱 モザイク・修正"},
-    "msg_settings_saved": {"en": "✅ Settings saved", "ja": "✅ 設定を保存しました"},
-    "msg_settings_err": {"en": "❌ Failed to save settings:", "ja": "❌ 設定の保存に失敗しました:"},
-    "msg_load_err": {"en": "❌ Failed to load image:", "ja": "❌ 画像を読み込めません:"},
-    "msg_tagger_err": {"en": "❌ WD14 Tagger API not found. Please ensure the extension is installed.", "ja": "❌ WD14 Tagger の API が見つかりません。Tagger拡張機能がインストールされているか確認してください。"},
-    "msg_api_err": {"en": "❌ API request failed:", "ja": "❌ APIリクエスト失敗:"},
-    "msg_tagger_not_found": {"en": "❌ Compatible interrogator not found. Tagger model not downloaded or version unsupported.", "ja": "❌ 対応するインタロゲーターが見つかりません。Taggerのモデルがダウンロードされていないか、拡張のバージョンが非対応です。"},
-    "msg_tag_fetch_err": {"en": "❌ Tag fetch error:", "ja": "❌ タグ取得エラー:"},
-    "msg_no_upload_err": {"en": "❌ Please upload an image", "ja": "❌ 画像をアップロードしてください"},
-    "msg_no_section_err": {"en": "❌ Please enter a section name", "ja": "❌ セクション名を入力してください"},
-    "msg_no_img_err": {"en": "❌ No image provided", "ja": "❌ 画像部分の指定がありませんでした"},
-    "msg_no_tags_err": {"en": "❌ No matching tags found", "ja": "❌ 該当するタグが見つかりませんでした"},
-    "msg_memo_appended": {"en": "✅ Appended to memo file", "ja": "✅ メモファイルに追記しました"},
-    "msg_memo_err": {"en": "❌ Failed to append:", "ja": "❌ 追記に失敗しました:"},
-    "default_negative": {
-        "en": "🚫 Default Negative",
-        "ja": "🚫 デフォルトネガティブ",
-    },
-    "default_negative_info": {
-        "en": "Appended to output",
-        "ja": "自動生成時に追加するネガティブプロンプト",
-    },
-    "btn_gen_tags": {
-        "en": "🏷️ Generate Tags",
-        "ja": "🏷️ タグ解析＆生成",
-    },
-    "btn_send_img2img": {
-        "en": "🚀 Send to img2img",
-        "ja": "🚀 img2imgへ送信",
-    },
-    "msg_sent_img2img": {
-        "en": "✅ Sent to img2img tab!",
-        "ja": "✅ img2imgタブへ転送しました！",
-    },
-    "btn_append_memo": {
-        "en": "📝 Append to Memo",
-        "ja": "📝 メモファイルに追記",
-    },
-    "append_status": {
-        "en": "Append Status",
-        "ja": "追記ステータス",
-    },
-    "health_check_ok": {
-        "en": "✅ All paths are healthy.",
-        "ja": "✅ すべてのパスが正しく設定されています。",
-    },
-    "health_check_err": {
-        "en": "⚠️ Path Error: {path} not found.",
-        "ja": "⚠️ パスエラー: {path} が見つかりません。",
-    },
-    "health_check_title": {
-        "en": "🔍 Path Health Check",
-        "ja": "🔍 パス設定のヘルスチェック",
-    },
-    "output_settings": {
-        "en": "📂 Output Folder & Sorting Settings",
-        "ja": "📂 出力先・自動フォルダ振り分け設定",
-    },
-    "sort_mode": {
-        "en": "📁 Sorting Mode",
-        "ja": "📁 振り分けモード",
-    },
-    "sort_none": {
-        "en": "None (WebUI Default)",
-        "ja": "なし (WebUIデフォルト)",
-    },
-    "sort_preset": {
-        "en": "By Preset Name",
-        "ja": "プリセット名で分ける",
-    },
-    "sort_section": {
-        "en": "By Matched Section Name",
-        "ja": "一致したセクション名で分ける",
-    },
-    "sort_date": {
-        "en": "By Date (YYYY-MM-DD)",
-        "ja": "日付で分ける (YYYY-MM-DD)",
-    },
-    "no_images": {
-        "en": "❌ No images found in the folder",
-        "ja": "❌ 画像フォルダに画像がありません",
-    },
-    "language_label": {
-        "en": "🌐 Language / 言語",
-        "ja": "🌐 Language / 言語",
-    },
-    "log_sel_sequential": {"en": "⬇️ Selected (Sequential {index}/{total}): {filename}", "ja": "⬇️ 選択画像 (順番 {index}/{total}): {filename}"},
-    "log_sel_random": {"en": "🎲 Selected (Random): {filename}", "ja": "🎲 選択画像 (ランダム): {filename}"},
-    "log_no_sections": {"en": "⚠️ No sections found in memo file", "ja": "⚠️ メモファイルにセクションが見つかりません"},
-    "log_sections_count": {"en": "📖 Sections count: {count}", "ja": "📖 メモセクション数: {count}"},
-    "log_fallback": {"en": "⚠️ Fallback to [default] section", "ja": "⚠️ 一致しないため [default] セクションへフォールバックします"},
-    "log_no_match": {"en": "⚠️ No matching section found", "ja": "⚠️ 一致するセクションが見つかりませんでした"},
-    "log_random_lora": {"en": "🎲 Random LoRA applied: {lora}", "ja": "🎲 ランダムLoRA適用: {lora}"},
-    "log_match_count": {"en": "✅ Matched sections: {count}", "ja": "✅ 一致セクション数: {count}"},
-    "tab_lora_manager": {"en": "🏷️ Prompt & LoRA Manager", "ja": "🏷️ プロンプト&LoRAマネージャー"},
-    "tab_inventory": {"en": "📦 Inventory Logic", "ja": "📦 在庫管理"},
-    "inventory_desc": {"en": "Manage how often specific prompts are picked to ensure diversity. Records how many times each item was selected and prioritizes less used items.", "ja": "使用回数の偏りを防ぎ、バリエーション豊かな生成を支援します。各項目の選択回数を記録し、使用頻度の低いものを優先的に選出します。"},
-    "inventory_status_label": {"en": "📊 Current Stock Status", "ja": "📊 現在の在庫（使用回数）状況"},
-    "lora_type": {"en": "LoRA Category", "ja": "LoRAカテゴリ"},
-    "lora_type_char": {"en": "Character", "ja": "キャラクター"},
-    "lora_type_sit": {"en": "Situation", "ja": "シチュエーション"},
-    "lora_list_label": {"en": "LoRA List (one per line)", "ja": "LoRAリスト（1行に1つ）"},
-    "lora_input_label": {"en": "New LoRA entry", "ja": "1件ずつ追加"},
-    "btn_append_lora": {"en": "➕ Append to List", "ja": "➕ リストに追記"},
-    "btn_save_lora_list": {"en": "💾 Save List", "ja": "💾 リストを保存"},
-    "msg_lora_saved": {"en": "LoRA list saved!", "ja": "LoRAリストを保存しました。"},
-    "msg_lora_appended": {"en": "Appended!", "ja": "追記しました！"},
-    "enable_random_char": {"en": "🎲 Random Character LoRA", "ja": "🎲 キャラLoRAをランダム適用"},
-    "enable_random_sit": {"en": "🎲 Random Situation LoRA", "ja": "🎲 シチュLoRAをランダム適用"},
-    "log_all_tags": {"en": "📊 Total tags: {count}", "ja": "📊 全タグ数: {count}"},
-    "log_filtered_tags": {"en": "✅ Filtered: {count}", "ja": "✅ フィルタ後: {count}"},
-    "log_excluded_tags": {"en": "🗑️ Excluded: {count}", "ja": "🗑️ 除外タグ数: {count}"},
-    "log_custom_match": {"en": "🎯 Custom match: [{cond}] => Added: {prompt}", "ja": "🎯 条件マッチ: [{cond}] => 追加: {prompt}"},
-    "log_no_pos_prompt": {"en": "⚠️ No valid positive prompt", "ja": "⚠️ 有効なポジティブプロンプトがありません"},
-    "generated_entry": {
-        "en": "📋 Generated Entry (editable)",
-        "ja": "📋 生成されたエントリ（編集可能）",
-    },
-    "generated_entry_info": {
-        "en": "Review and edit before appending to memo file",
-        "ja": "メモファイルへ追記する前に確認・編集してください",
-    },
-    "analysis_log": {
-        "en": "Analysis Log",
-        "ja": "解析ログ"
-    },
-    "tab_usage": {"en": "📖 Usage", "ja": "📖 使い方"},
-    "usage_md": {
-        "en": (
-            "## 📖 User Manual (v1.1)\n\n"
-            "### 1. Basic Flow\n"
-            "1. Set your **📁 Image Folder** and **📄 Memo File** paths in the Settings tab.\n"
-            "2. In the **img2img** tab, open **🎲 Smart Composer** and check **Enable**.\n"
-            "3. Click **Generate**. The script will pick a random image and its matching prompt from your memo file.\n\n"
-            "### 2. Memo File Format\n"
-            "```text\n"
-            "[beach]\n"
-            "positive: 1girl, swimming, sea, sunset\n"
-            "negative: lowres, blurry\n\n"
-            "[forest]\n"
-            "1girl, standing in woods, trees, bird\n"
-            "```\n"
-            "- `[title]` matches image filenames (e.g. `beach_01.png` matches `[beach]`).\n"
-            "- If `positive:`/`negative:` are missing, the whole block is positive.\n"
-            "- Empty sections will fallback to the `[default]` section.\n\n"
-            "### 3. v1.1.2 New Features\n"
-            "- **📦 Inventory Logic Tab**: A dedicated tab to manage randomization. Records how many times each item was selected and prioritizes less used items. You can check stock status and reset records here.\n"
-            "- **🚀 Enhanced img2img Transfer**: The 'Send to img2img' button in the Auto-Prompt Gen tab now transfers both **Prompts and the Image** itself directly to the main generation tab.\n"
-            "- **📏 Tag Pickup Limits**: Set individual limits for Base, Character, and NSFW tag groups during auto-generation to prevent prompt overflow.\n"
-            "- **🧱 Mosaic Auto-Prompt**: Automatically detect mosaic/censoring in images and apply appropriate weight-adjusted tags.\n\n"
-            "### 4. Advanced Features\n"
-            "- **📦 Presets**: Save all settings (paths, thresholds, limits, etc.) as named presets for quick switching.\n"
-            "- **⚖️ LoRA Weight Adjustment**: Use the slider to offset all LoRA weights in your prompts collectively.\n"
-            "- **📁 Output Sorting**: Automatically organize generated images into subfolders named by Preset, Section, or Date.\n"
-            "- **🔍 Health Check**: Invalid paths will show a ❌ mark on their labels.\n"
-            "- **🏷️ LoRA Manager**: Manage your character/situation LoRA lists easily."
-        ),
-        "ja": (
-            "## 📖 ユーザーマニュアル (v1.1)\n\n"
-            "### 1. 基本的な使い方\n"
-            "1. **⚙️ 設定** タブで **📁 画像フォルダ** と **📄 メモファイル** のパスを指定します。\n"
-            "2. **img2img** タブ内の **🎲 Smart Composer** アコーディオンを開き、**有効化** にチェックを入れます。\n"
-            "3. **Generate** をクリックすると、画像とプロンプトが自動的に送り込まれます。\n\n"
-            "### 2. メモファイルの書き方\n"
-            "```text\n"
-            "[タイトル1]\n"
-            "positive: 1girl, 笑顔, 公園\n"
-            "negative: 低品質, ぼけ\n\n"
-            "[タイトル2]\n"
-            "1girl, 立ち姿, 部屋, 夜\n"
-            "```\n"
-            "- `[タイトル]` 部分が画像ファイル名と部分一致（あいまい検索）します。\n"
-            "- `positive:` / `negative:` を省略すると、そのブロック全体がポジティブ扱いになります。\n"
-            "- 内容が空のセクションは、自動的に `[default]` セクションの設定へ飛ばされます。\n\n"
-            "### 3. v1.1.2 新機能\n"
-            "- **📦 在庫管理タブ**: ランダム選出の偏りを防ぐための専用タブです。どのLoRAやワイルドカードが何回選ばれたかを記録し、使用頻度の低いものを優先します。在庫状況の確認やリセットもここで行えます。\n"
-            "- **🚀 img2img 連携の強化**: プロンプト自動生成タブの「img2imgへ送信」ボタンが、**プロンプトと画像の両方**をメインタブへ直接転送するようになりました。\n"
-            "- **📏 カテゴリ別上限設定**: 自動生成時に「基本」「人物」「NSFW」の各カテゴリごとに抽出するタグの上限数を個別に設定できるようになりました。\n"
-            "- **🧱 モザイク自動抽出**: 画像内のモザイクや修正を自動検出し、適切な強度のプロンプトを自動付与します。\n\n"
-            "### 4. 便利な機能\n"
-            "- **📦 プリセット**: 各パスや上限設定、しきい値などを名前を付けて保存し、一瞬で切り替えられます。\n"
-            "- **⚖️ LoRA一括ウェイト微調整**: プロンプトに含まれる全てのLoRAの重みを一律に増減できます。\n"
-            "- **📁 自動フォルダ振り分け**: 生成画像を「プリセット名」「セクション名」「日付」ごとに自動整理します。\n"
-            "- **🔍 ヘルスチェック**: パスが無効な場合、入力欄のラベルに ❌ が表示されます。\n"
-            "- **🏷️ LoRAマネージャー**: キャラクターやシチュエーションごとのLoRAリストを簡単に管理できます。"
-        )
-    },
-    "lora_unsaved_warning": {
-        "en": "⚠️ Unsaved changes detected. Save before switching?",
-        "ja": "⚠️ 未保存の変更があります。切り替える前に保存しますか？",
-    },
-    "lora_mgr_placeholder": {
-        "en": "Loading...",
-        "ja": "読み込み中...",
-    },
-    "tab_smart_negative": {"en": "🚫 Smart Negative", "ja": "🚫 スマート・ネガティブ"},
-    "sn_mode_add": {"en": "Append", "ja": "末尾に追加"},
-    "sn_mode_overwrite": {"en": "Overwrite", "ja": "上書き"},
-    "btn_check_stock": {"en": "📊 Check Stock", "ja": "📊 在庫を確認"},
-    "btn_global_reset": {"en": "🧹 Global Reset", "ja": "🧹 全在庫リセット"},
-    "btn_lora_reset": {"en": "🏷️ LoRA Reset", "ja": "🏷️ LoRA在庫のみリセット"},
-    "h_inventory_settings": {"en": "### 📦 Inventory Logic Settings", "ja": "### 📦 在庫管理 (Inventory) 設定"},
-    "inventory_mode": {"en": "Enable Inventory System", "ja": "在庫管理システムを有効にする"},
-    "inventory_mode_info": {"en": "Prioritize selecting less used LoRAs/wildcards.", "ja": "使用回数の少ないLoRAやワイルドカードを優先的に選出します。"},
-    "msg_inventory_reset": {"en": "Inventory records reset.", "ja": "在庫記録をリセットしました。"},
-    "msg_all_saved": {"en": "All settings saved.", "ja": "すべての設定を保存しました。"},
+    "pos_smart": {"en": "Smart", "ja": "スマート"},
+    "enable_random_char": {"en": "Random Char", "ja": "ランダムキャラ"},
+    "enable_random_sit": {"en": "Random Situation", "ja": "ランダムシチュ"},
+    "selection_mode": {"en": "Selection Mode", "ja": "選択モード"},
+    "sel_random": {"en": "Random", "ja": "ランダム"},
+    "sel_sequential": {"en": "Sequential", "ja": "順番"},
+    "overwrite_prompt": {"en": "Overwrite Prompt", "ja": "プロンプト上書き"},
+    "resize_mode": {"en": "Resize Mode", "ja": "リサイズモード"},
+    "resize_none": {"en": "None", "ja": "なし"},
+    "resize_slider_base": {"en": "Slider (Base Res)", "ja": "スライダー指定"}, # キー重複を避けるため変更
+    "resize_512": {"en": "512-1024", "ja": "512-1024"},
+    "resize_1024": {"en": "1024-1536", "ja": "1024-1536"},
+    "resize_1536": {"en": "1536-1792", "ja": "1536-1792"},
+    "base_resolution": {"en": "Base Res", "ja": "基本解像度"},
+    "msg_settings_saved": {"en": "Settings Saved", "ja": "設定を保存しました"},
+    "msg_settings_err": {"en": "Save Error", "ja": "保存エラー"},
+    "msg_no_tags_err": {"en": "No Tags", "ja": "タグがありません"},
+    "use_global_conf": {"en": "Prioritize Global Confidence", "ja": "タグ信頼性(共通)を優先する"},
+    "use_global_conf_info": {"en": "* If unchecked, individual category values will be prioritized.", "ja": "※チェックを外すと、各カテゴリ（基本・キャラ・NSFW）の個別数値が優先されます。"},
+    "health_check_ok": {"en": "✅ Ready", "ja": "✅ 正常"},
+    "health_check_err": {"en": "❌ Not Found", "ja": "❌ 異常"},
 }
 
 _lang_cache = None
 
 def _get_lang() -> str:
     global _lang_cache
-    if _lang_cache is not None:
-        return _lang_cache
+    if _lang_cache is not None: return _lang_cache
     try:
         if os.path.exists(CONFIG_PATH):
             with open(CONFIG_PATH, "r", encoding="utf-8") as f:
                 _lang_cache = json.load(f).get("language", "ja")
                 return _lang_cache
-    except Exception:
-        pass
+    except Exception: pass
     return "ja"
 
 def invalidate_lang_cache():

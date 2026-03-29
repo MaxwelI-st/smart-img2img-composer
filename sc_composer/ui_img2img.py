@@ -7,7 +7,7 @@ from .constants import PROMPT_PROFILES
 def on_ui_img2img():
     config = load_config()
 
-    with gr.Accordion("🎲 Smart Img2Img Composer", open=False, elem_id="smart_composer_accordion"):
+    with gr.Accordion("\U0001F3B2 Smart Img2Img Composer", open=False, elem_id="smart_composer_accordion"):
         gr.Markdown(t("accordion_desc"))
         
         enabled = gr.Checkbox(
@@ -16,7 +16,7 @@ def on_ui_img2img():
             elem_id="smart_composer_enabled",
         )
 
-        # ランダムアセット・スロット (Nested Accordion)
+        # Assets
         with gr.Accordion(t("accordion_assets"), open=False):
             with gr.Row():
                 gr.Markdown(f"<div style='text-align: right; padding-right: 15px;'><b>{t('pos_label')}</b></div>")
@@ -54,7 +54,6 @@ def on_ui_img2img():
                 value=True,
             )
 
-        # Hidden but available for the script
         active_profile = gr.Dropdown(
             label=t("active_profile"),
             choices=list(PROMPT_PROFILES.keys()),
@@ -78,7 +77,7 @@ def on_ui_img2img():
             )
 
         with gr.Row():
-            _resize_choices = [t("resize_none"), t("resize_slider"), t("resize_512"), t("resize_1024"), t("resize_1536")]
+            _resize_choices = [t("resize_none"), t("resize_slider_base"), t("resize_512"), t("resize_1024"), t("resize_1536")]
             resize_mode = gr.Dropdown(
                 label=t("resize_mode"),
                 choices=_resize_choices,
@@ -93,8 +92,9 @@ def on_ui_img2img():
         with gr.Accordion(t("output_settings"), open=False):
             output_sort_mode = gr.Dropdown(
                 label=t("sort_mode"),
-                choices=[t("sort_none"), t("sort_preset"), t("sort_section"), t("sort_date")],
-                value=t("sort_none")
+                # Internal keys: "None", "By Preset", "By Section", "By Date"
+                choices=[(t("sort_none"), "None"), (t("sort_preset"), "By Preset"), (t("sort_section"), "By Section"), (t("sort_date"), "By Date")],
+                value="None"
             )
             auto_filename_chk = gr.Checkbox(
                 label=t("auto_filename"),
