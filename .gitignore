@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+config.json
+.vscode/
+*.zip
+
+# Local User Assets & Docs
+smart_img2img_composer_fullcode.md
+lora_char.txt
+lora_sit.txt
+wildcard_*.txt
+inventory.json

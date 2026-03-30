@@ -1,0 +1,14 @@
+# Smart Img2Img Composer — 追加依存ライブラリ
+# Stable Diffusion WebUI (AUTOMATIC1111) v1.10.x の環境では
+# 以下のほとんどが既にインストール済みです。
+# 不足している場合のみ pip install -r requirements.txt を実行してください。
+
+# 画像処理（WebUI付属）
+Pillow>=9.0.0
+
+# YAML設定ファイル読み込み（EasyPromptSelector連携）
+# WebUI付属の場合は不要
+PyYAML>=6.0
+
+# Gradio（WebUI付属のバージョンに依存するため直接インストール非推奨）
+# gradio>=3.41.0
